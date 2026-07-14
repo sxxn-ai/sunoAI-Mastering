@@ -1,0 +1,2893 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+    <title>SYNTH MASTER AI | Professional Mastering Suite</title>
+    <!-- PWA 지원 링크 및 모바일 테마 설정 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00f0ff">
+    <!-- Tailwind CSS CDN 및 폰트/아이콘 로드 -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- JSZip 라이브러리 로드 (일괄 마스터링 앨범 압축 저장용) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "inverse-primary": "#006970",
+                "surface-variant": "#353436",
+                "on-primary-container": "#006970",
+                "surface-bright": "#3a393a",
+                "tertiary": "#fff3f4",
+                "on-surface-variant": "#b9cacb",
+                "surface": "#131314",
+                "primary-container": "#00f0ff",
+                "tertiary-container": "#ffccd6",
+                "on-tertiary-container": "#bb0058",
+                "tertiary-fixed-dim": "#ffb1c3",
+                "on-secondary-fixed": "#320047",
+                "inverse-surface": "#e5e2e3",
+                "primary": "#dbfcff",
+                "on-primary": "#00363a",
+                "secondary": "#ebb2ff",
+                "secondary-fixed": "#f8d8ff",
+                "on-secondary-container": "#fff6fc",
+                "surface-dim": "#131314",
+                "secondary-container": "#b600f8",
+                "on-primary-fixed-variant": "#004f54",
+                "background": "#131314",
+                "surface-container-high": "#2a2a2b",
+                "secondary-fixed-dim": "#ebb2ff",
+                "surface-container-highest": "#353436",
+                "outline-variant": "#3b494b",
+                "on-tertiary-fixed": "#3f0019",
+                "on-secondary-fixed-variant": "#74009f",
+                "error": "#ffb4ab",
+                "outline": "#849495",
+                "on-surface": "#e5e2e3",
+                "surface-container-lowest": "#0e0e0f",
+                "on-tertiary": "#66002c",
+                "primary-fixed": "#7df4ff",
+                "error-container": "#93000a",
+                "surface-container": "#201f20",
+                "on-secondary": "#520072",
+                "surface-container-low": "#1c1b1c",
+                "on-tertiary-fixed-variant": "#8f0041",
+                "inverse-on-surface": "#313031",
+                "surface-tint": "#00dbe9",
+                "on-background": "#e5e2e3",
+                "on-error": "#690005",
+                "tertiary-fixed": "#ffd9e0",
+                "on-error-container": "#ffdad6",
+                "primary-fixed-dim": "#00dbe9",
+                "on-primary-fixed": "#002022"
+            },
+            "borderRadius": {
+                "DEFAULT": "4px",
+                "lg": "8px",
+                "xl": "12px",
+                "full": "9999px"
+            },
+            "spacing": {
+                "margin-edge": "32px",
+                "container-max": "1440px",
+                "gutter": "24px",
+                "unit": "4px"
+            },
+            "fontFamily": {
+                "timestamp": ["JetBrains Mono"],
+                "headline-md": ["Sora"],
+                "data-mono": ["JetBrains Mono"],
+                "body-md": ["Sora"],
+                "headline-lg-mobile": ["Sora"],
+                "headline-lg": ["Sora"],
+                "body-sm": ["Sora"]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        body {
+            background-color: #050506;
+            color: #e5e2e3;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(19, 19, 20, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-panel:hover {
+            border-color: rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.03);
+        }
+        .neon-glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+            border-color: rgba(0, 240, 255, 0.4);
+        }
+        .custom-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #0e0e0f;
+            outline: none;
+            border-radius: 3px;
+            margin: 6px 0;
+            transition: background 0.2s;
+        }
+        .custom-slider:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 8px;
+            height: 18px;
+            border-radius: 2px;
+            background: linear-gradient(135deg, #00f0ff, #4facfe);
+            cursor: pointer;
+            box-shadow: 0 0 8px #00f0ff;
+            transition: transform 0.1s;
+        }
+        .custom-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        .custom-slider:disabled::-webkit-slider-thumb {
+            background: #64748b;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .led-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+        
+        .queue-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .queue-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .queue-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+        }
+        .queue-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 240, 255, 0.3);
+        }
+
+        .queue-item {
+            background: rgba(14, 20, 32, 0.55) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 12px !important;
+            padding: 16px 20px !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            margin-bottom: 8px;
+        }
+        .queue-item:hover {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border-color: rgba(0, 240, 255, 0.25) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 240, 255, 0.08);
+        }
+        .queue-item.active {
+            background: rgba(0, 240, 255, 0.06) !important;
+            border-color: #00f0ff !important;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2) !important;
+        }
+
+        #detected-genre {
+            font-size: 1.18rem !important;
+            font-weight: 800 !important;
+            color: #00f0ff !important;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.65), 0 0 2px rgba(0, 240, 255, 0.9) !important;
+            letter-spacing: -0.3px;
+        }
+
+        #genre-select {
+            padding: 8px 16px !important;
+            font-size: 0.88rem !important;
+            font-weight: 700 !important;
+            height: auto !important;
+            min-width: 200px !important;
+            border: 1px solid rgba(0, 240, 255, 0.4) !important;
+            background-color: rgba(10, 12, 16, 0.9) !important;
+            border-radius: 8px !important;
+            transition: all 0.2s ease;
+        }
+        #genre-select:hover:not(:disabled) {
+            border-color: #00f0ff !important;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3) !important;
+        }
+
+        #analysis-reason {
+            font-size: 0.85rem !important;
+            color: #f1f5f9 !important;
+            line-height: 1.55 !important;
+            background: rgba(0, 240, 255, 0.04) !important;
+            padding: 14px 16px !important;
+            border-radius: 10px !important;
+            border: 1px solid rgba(0, 240, 255, 0.2) !important;
+            border-left: 4px solid #00f0ff !important;
+            box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.02) !important;
+        }
+
+        .export-success-glow {
+            animation: successGlow 2.5s ease-out !important;
+        }
+        @keyframes successGlow {
+            0% {
+                border-color: #39ff14 !important;
+                box-shadow: 0 0 35px rgba(57, 255, 20, 0.45) !important;
+                background-color: rgba(57, 255, 20, 0.08) !important;
+            }
+            100% {
+                border-color: rgba(255, 255, 255, 0.05) !important;
+                box-shadow: none;
+                background-color: rgba(14, 20, 32, 0.55) !important;
+            }
+        }
+
+        .modal-active {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        .modal-active > div {
+            transform: scale(1) !important;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        
+        .glow-focus-effect {
+            animation: focusGlowPulse 1.8s ease-in-out !important;
+        }
+        @keyframes focusGlowPulse {
+            0%, 100% {
+                border-color: rgba(255, 255, 255, 0.05) !important;
+                box-shadow: none;
+            }
+            30%, 70% {
+                border-color: #00f0ff !important;
+                box-shadow: 0 0 35px rgba(0, 240, 255, 0.35) !important;
+            }
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md selection:bg-primary-fixed/30 min-h-screen">
+
+<!-- WebGL Aurora Shader 배경막 -->
+<div class="fixed inset-0 w-full h-full z-0 opacity-30 pointer-events-none" style="display:block;">
+    <canvas id="shader-canvas-ANIMATION_4" style="display:block;width:100%;height:100%"></canvas>
+    <script>
+    (function() {
+      const canvas = document.getElementById('shader-canvas-ANIMATION_4');
+      function syncSize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width  = w;
+          canvas.height = h;
+        }
+      }
+      window.addEventListener('resize', syncSize);
+      syncSize();
+
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return;
+      const vs = `attribute vec2 a_position;
+    varying vec2 v_texCoord;
+    void main() {
+      v_texCoord = a_position * 0.5 + 0.5;
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }`;
+      const fs = `precision highp float;
+    uniform float u_time;
+    uniform vec2 u_resolution;
+    varying vec2 v_texCoord;
+
+    void main() {
+        vec2 uv = v_texCoord;
+        float t = u_time * 0.2;
+        
+        float n1 = sin(uv.x * 3.0 + t) * 0.5 + 0.5;
+        float n2 = sin(uv.y * 2.0 - t * 1.5) * 0.5 + 0.5;
+        float n3 = cos(uv.x * 2.0 + uv.y * 3.0 + t * 0.8) * 0.5 + 0.5;
+        
+        vec3 color = vec3(0.02, 0.02, 0.03); 
+        
+        vec3 cyan = vec3(0.0, 0.94, 1.0);
+        float glow1 = smoothstep(0.4, 0.9, n1 * n2);
+        color += cyan * glow1 * 0.18;
+        
+        vec3 purple = vec3(0.64, 0.0, 1.0);
+        float glow2 = smoothstep(0.3, 0.8, n2 * n3);
+        color += purple * glow2 * 0.14;
+        
+        float d = length(uv - vec2(0.2, 0.8));
+        color += cyan * (1.0 - smoothstep(0.0, 0.8, d)) * 0.05;
+
+        gl_FragColor = vec4(color, 1.0);
+    }`;
+      function cs(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      }
+      const prog = gl.createProgram();
+      gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+      gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+      const pos = gl.getAttribLocation(prog, 'a_position');
+      gl.enableVertexAttribArray(pos);
+      gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+      const uTime = gl.getUniformLocation(prog, 'u_time');
+      const uRes = gl.getUniformLocation(prog, 'u_resolution');
+
+      function render(t) {
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        if (uTime) gl.uniform1f(uTime, t * 0.001);
+        if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        requestAnimationFrame(render);
+      }
+      render(0);
+    })();
+    </script>
+</div>
+
+<!-- 상단 네비게이션 바 -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-edge h-16 bg-surface/85 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,219,233,0.08)]">
+    <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-compact-disc text-primary-fixed-dim text-xl animate-spin" style="animation-duration: 8s;"></i>
+        <div class="font-headline-md text-headline-md font-bold text-primary-fixed tracking-tight uppercase select-none">
+            SYNTH MASTER AI
+        </div>
+    </div>
+    <div class="hidden md:flex items-center space-x-8">
+        <a class="text-primary-fixed-dim border-b-2 border-primary-fixed-dim pb-1 font-body-md cursor-pointer transition-colors duration-300" href="#">Studio 랙</a>
+        <a id="nav-library-link" class="text-on-surface-variant font-body-md hover:text-primary transition-colors duration-300 cursor-pointer" href="#">Library 서랍</a>
+        <a id="nav-guide-link" class="text-on-surface-variant font-body-md hover:text-primary transition-colors duration-300 cursor-pointer" href="#">유통 가이드</a>
+    </div>
+    <div class="flex items-center space-x-4">
+        <button id="btn-pwa-install" class="hidden px-3.5 py-1.5 bg-gradient-to-r from-primary-container to-inverse-primary text-on-primary font-bold text-xs rounded-full shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:brightness-110 active:scale-95 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-cloud-arrow-down"></i> 바탕화면 앱 설치
+        </button>
+        <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:scale-95" onclick="alert('SunoMaster V5 - 으뜸 스튜디오 에디션')">info</button>
+    </div>
+</nav>
+
+<!-- 좌측 네비게이션 도킹 독 -->
+<aside class="fixed left-0 top-16 bottom-0 z-40 flex flex-col py-gutter bg-surface-container-lowest/90 backdrop-blur-2xl border-r border-white/5 shadow-2xl w-20 hover:w-56 transition-all duration-300 group overflow-hidden">
+    <div class="flex flex-col flex-1 space-y-4 px-4">
+        <div class="flex items-center space-x-4 p-2 rounded-lg bg-primary-fixed/10 border-r-2 border-primary-fixed text-primary-fixed-dim">
+            <span class="material-symbols-outlined">grid_view</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity font-body-sm whitespace-nowrap">Dashboard</span>
+        </div>
+        <div id="dock-rack-link" class="flex items-center space-x-4 p-2 rounded-lg text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer">
+            <span class="material-symbols-outlined">graphic_eq</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity font-body-sm whitespace-nowrap">Audio Rack</span>
+        </div>
+    </div>
+    <div class="mt-auto px-4 space-y-4">
+        <button id="btn-dock-upload" class="w-full flex items-center justify-center p-2 bg-secondary-container text-on-secondary-container rounded-xl shadow-lg hover:brightness-110 transition-all">
+            <span class="material-symbols-outlined">add</span>
+            <span class="hidden group-hover:block ml-2 whitespace-nowrap font-body-sm">음원 추가</span>
+        </button>
+        <div class="flex items-center space-x-4 p-2 text-outline hover:text-on-surface-variant cursor-pointer" onclick="window.open('https://www.bandlab.com')">
+            <span class="material-symbols-outlined">help_outline</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity font-body-sm whitespace-nowrap">BandLab</span>
+        </div>
+    </div>
+</aside>
+
+<!-- 메인 스튜디오 작업 공간 -->
+<main class="ml-20 pt-24 pb-12 px-gutter min-h-screen relative z-10">
+    <div class="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+        
+        <!-- 왼쪽 패널: 음원 업로드 & 대기열 & 스마트 분석 -->
+        <section class="lg:col-span-5 space-y-gutter">
+            
+            <!-- 드롭존 (Dropzone) -->
+            <div id="drop-zone" class="glass-panel p-8 rounded-xl border-dashed border-2 border-outline/30 flex flex-col items-center justify-center text-center group cursor-pointer hover:border-primary-fixed/50 transition-all">
+                <input type="file" id="audio-file-input" accept="audio/*, .mp3, .wav, .m4a, .flac, .ogg" multiple style="display: none;">
+                <span class="material-symbols-outlined text-4xl text-outline group-hover:text-primary-fixed transition-colors mb-3">cloud_upload</span>
+                <h3 class="font-headline-md text-on-surface text-base mb-1">여기에 수노 AI 음원 20곡 일괄 드롭!</h3>
+                <p class="text-on-surface-variant text-xs max-w-xs mb-1">WAV 및 MP3 모두 완벽 지원 (복수 폴더 드래그 가능)</p>
+                <span class="text-[10px] text-outline">K-POP, 어쿠스틱 등 모든 하이브리드 장르 마스터링 대응 완료</span>
+            </div>
+            
+            <!-- 플레이리스트 대기열 (Playlist Queue) -->
+            <div id="track-queue-card" class="glass-panel p-5 rounded-xl space-y-4 hidden">
+                <div class="flex justify-between items-center mb-1 flex-wrap gap-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="material-symbols-outlined text-primary-fixed text-base">queue_music</span>
+                        <h4 id="queue-title-text" class="font-headline-md text-primary-fixed text-sm">마스터링 대기열 (Queue)</h4>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="batch-genre-select" class="bg-surface-container-low text-[10px] border border-white/10 rounded-full px-2.5 py-1 text-secondary-fixed font-bold outline-none cursor-pointer" disabled>
+                            <option value="" disabled selected>일괄 스타일 매크로 지정</option>
+                            <option value="auto">✨ 원래 AI 자동 분석 추천으로 모두 복구</option>
+                            <option value="pop">Universal / Pop (통일성/기본 추천)</option>
+                            <option value="kpop">Universal & Fire / K-POP</option>
+                            <option value="kballad">Clarity & Tape / K-Ballad</option>
+                            <option value="ballad">Clarity / Ballad</option>
+                            <option value="hiphop">Fire / Hip-Hop</option>
+                            <option value="rock">Punch / Rock</option>
+                            <option value="citypop">Tape & Punch / City Pop</option>
+                            <option value="synthpop">Universal & Punch / Synth Pop</option>
+                            <option value="jazzrnb">Clarity / Jazz R&B</option>
+                            <option value="acoustic">Clarity / Acoustic & Folk</option>
+                            <option value="indiepop">Tape & Universal / Indie Pop</option>
+                            <option value="lofi">Tape / Lo-Fi</option>
+                        </select>
+                        <button id="btn-batch-export" class="px-3 py-1 bg-gradient-to-r from-primary-fixed-dim to-inverse-primary text-on-primary font-bold text-xs rounded-full shadow hover:brightness-115 transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none" disabled>
+                            <i class="fa-solid fa-download"></i> 일괄 다운로드
+                        </button>
+                    </div>
+                </div>
+                <!-- 큐 스크롤 영역 -->
+                <div id="queue-list" class="queue-list queue-scroll space-y-2 max-h-56 overflow-y-auto pr-1">
+                </div>
+
+                <!-- 앨범 단위 통합 대표 장르 추천 카드 -->
+                <div id="album-recommend-card" class="bg-primary-fixed/5 p-4 rounded-xl border border-primary-fixed/20 space-y-2.5 mt-3 hidden">
+                    <span class="text-[9px] font-data-mono text-primary-fixed uppercase flex items-center gap-1.5 font-bold">
+                        <i class="fa-solid fa-compact-disc animate-spin" style="animation-duration: 8s;"></i> ALBUM TOTAL GENRE RECOMMEND
+                    </span>
+                    <p class="text-[10px] text-outline leading-relaxed">대기열에 로드된 총 <span id="album-track-count" class="text-white font-bold">0</span>곡의 분석 프로필을 실시간 크로스 분석한 결과, 이 앨범을 디토뮤직에 등록 시 가장 권장되는 대표 장르입니다.</p>
+                    <div class="grid grid-cols-2 gap-3 text-[11px]">
+                        <div class="bg-surface-container-lowest/80 p-2 rounded border border-white/5">
+                            <span class="text-outline text-[8px] block mb-0.5">Album Primary (앨범 대분류)</span>
+                            <span id="album-primary-genre" class="font-bold text-on-surface">Alternative</span>
+                        </div>
+                        <div class="bg-surface-container-lowest/80 p-2 rounded border border-white/5">
+                            <span class="text-outline text-[8px] block mb-0.5">Album Secondary (앨범 소분류)</span>
+                            <span id="album-secondary-genre" class="font-bold text-primary-fixed">Indie Pop</span>
+                        </div>
+                    </div>
+
+                    <!-- AI 앨범 아트워크 프롬프트 제안 박스 -->
+                    <div class="bg-surface-container-high/60 p-3 rounded-lg border border-white/5 space-y-2 mt-2">
+                        <span class="text-[9px] font-data-mono text-secondary-fixed flex items-center gap-1.5 font-bold">
+                            <i class="fa-solid fa-wand-magic-sparkles text-secondary-fixed"></i> AI ARTWORK PROMPT
+                        </span>
+                        <div class="bg-surface-container-lowest/80 p-2.5 rounded border border-white/5 text-[10px] space-y-1.5">
+                            <span class="text-outline text-[8px] block">추천 커버 아트워크 테마 (Theme)</span>
+                            <p id="album-art-theme" class="text-on-surface font-semibold text-[11px]">도시의 밤, 네온 불빛과 아날로그 빈티지 감성의 쓸쓸함</p>
+                            
+                            <span class="text-outline text-[8px] block mt-2">이미지 생성 AI 프롬프트 (Copy 가능)</span>
+                            <div class="relative">
+                                <textarea id="album-art-prompt" readonly class="w-full bg-surface-container-low text-[9px] font-data-mono border border-white/10 rounded p-1.5 pr-8 text-secondary-fixed outline-none resize-none h-12 leading-relaxed" style="color: #00f0ff;">A moody cinematic photography of a rainy city street at night, neon reflections, vintage analog film grain style, highly detailed, album cover art --ar 1:1</textarea>
+                                <button id="btn-copy-prompt" class="absolute right-1.5 top-1.5 text-outline hover:text-white transition-colors" title="프롬프트 복사">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI 스마트 오디오 분석 패널 -->
+            <div id="analysis-panel" class="glass-panel p-5 rounded-xl space-y-4 hidden">
+                <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-secondary-fixed text-base">analytics</span>
+                    <h4 class="font-headline-md text-on-surface text-sm">AI 스마트 오디오 분석</h4>
+                </div>
+                
+                <div class="bg-surface-container-lowest/80 p-3 rounded-lg border border-white/5 flex justify-between items-center text-xs">
+                    <span id="display-file-name" class="font-bold text-on-surface-variant truncate max-w-[80%]">파일명.mp3</span>
+                    <span id="display-duration" class="font-data-mono text-outline">0:00</span>
+                </div>
+                
+                <!-- 분석 로딩 바 -->
+                <div id="analyzer-loading" class="analyzer-loading py-4">
+                    <div class="spinner"></div>
+                    <span class="text-xs text-outline">음원의 주파수 및 볼륨 프로필 분석 중...</span>
+                </div>
+                
+                <!-- 분석 결과 대시보드 -->
+                <div id="analyzer-results" class="analyzer-results space-y-4 hidden">
+                    <div class="result-badge-container">
+                        <div class="result-badge">
+                            <span class="badge-title">감지된 추천 장르</span>
+                            <span id="detected-genre" class="badge-value">Pop / Clarity</span>
+                        </div>
+                        <div class="genre-selector-container">
+                            <span class="badge-title">마스터링 스타일 수정</span>
+                            <select id="genre-select" class="bg-surface-container-low text-xs border border-white/10 rounded px-2 py-1 outline-none text-primary-fixed" disabled>
+                                <option value="auto" selected>AI 자동 분석 추천 (AI Auto)</option>
+                                <option value="custom">사용자 커스텀 (수정됨)</option>
+                                <option value="bypass">선택 안 함 (원음 그대로)</option>
+                                <option value="pop">Pop / Universal (원음 보존)</option>
+                                <option value="hiphop">Fire / Hip-Hop (저음 극대화)</option>
+                                <option value="rock">Punch / Rock (중음역 강화)</option>
+                                <option value="ballad">Clarity / Ballad (보컬 강화)</option>
+                                <option value="lofi">Tape / Lo-Fi (빈티지 감성)</option>
+                                <option value="jazzrnb">Clarity / Jazz R&B (보컬 및 공간 극대화)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <p id="analysis-reason" class="analysis-reason text-xs leading-relaxed"></p>
+                    
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-surface-container-low p-2.5 rounded text-center border border-white/5">
+                            <p class="text-[9px] font-data-mono text-outline mb-0.5">평균 음압 (RMS)</p>
+                            <p id="original-rms" class="font-data-mono text-sm text-primary-fixed font-bold">-18.5 dB</p>
+                        </div>
+                        <div class="bg-surface-container-low p-2.5 rounded text-center border border-white/5">
+                            <p class="text-[9px] font-data-mono text-outline mb-0.5">저음역 에너지</p>
+                            <p id="low-energy" class="font-body-md text-xs text-on-surface font-bold">보통</p>
+                        </div>
+                        <div class="bg-surface-container-low p-2.5 rounded text-center border border-white/5">
+                            <p class="text-[9px] font-data-mono text-outline mb-0.5">고음역 거침도</p>
+                            <p id="high-harshness" class="font-body-md text-xs text-primary-fixed font-bold">낮음</p>
+                        </div>
+                    </div>
+
+                    <!-- 디토뮤직 유통 장르 추천 가이드 카드 -->
+                    <div class="bg-surface-container-low/40 p-3 rounded-lg border border-white/5 space-y-2 mt-2">
+                        <span class="text-[9px] font-data-mono text-primary-fixed-dim uppercase flex items-center gap-1.5 font-bold">
+                            <i class="fa-solid fa-cloud-arrow-down text-primary-fixed-dim"></i> DITTO MUSIC GENRE RECOMMEND
+                        </span>
+                        <div class="grid grid-cols-2 gap-3 text-[11px]">
+                            <div class="bg-surface-container-lowest/80 p-2 rounded border border-white/5">
+                                <span class="text-outline text-[8px] block mb-0.5">Primary (대분류)</span>
+                                <span id="ditto-primary-genre" class="font-bold text-on-surface">Alternative</span>
+                            </div>
+                            <div class="bg-surface-container-lowest/80 p-2 rounded border border-white/5">
+                                <span class="text-outline text-[8px] block mb-0.5">Secondary (소분류)</span>
+                                <span id="ditto-secondary-genre" class="font-bold text-primary-fixed">Indie Pop</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 마스터링 전/후 파형 비교 -->
+                <div id="waveform-compare-container" class="space-y-1 hidden">
+                    <span class="text-[9px] font-data-mono text-outline uppercase flex items-center gap-1">
+                        <i class="fa-solid fa-chart-line text-primary-fixed-dim"></i> AUDIO WAVEFORM (마스터링 전/후 비교)
+                    </span>
+                    <div class="h-16 w-full bg-surface-container-lowest/80 rounded-lg relative overflow-hidden border border-white/5">
+                        <canvas id="waveform-canvas" class="w-full h-full block"></canvas>
+                    </div>
+                    <div class="flex justify-between text-[8px] text-outline font-data-mono px-1 pb-1">
+                        <span>BEFORE (오리지널 원곡)</span>
+                        <span class="text-primary-fixed">AFTER (마스터링 가상 예측)</span>
+                    </div>
+                </div>
+
+                <!-- 실시간 비주얼라이저 -->
+                <div class="h-28 w-full bg-surface-container-lowest rounded-lg relative overflow-hidden">
+                    <div class="canvas-wrapper w-full h-full relative">
+                        <canvas id="visualizer-canvas"></canvas>
+                        <span id="no-audio-fallback" class="canvas-fallback">AUDIO SIGNAL OFFLINE</span>
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+        
+        <!-- 오른쪽 패널: 마스터링 슬라이더 랙 (Effect Rack) -->
+        <section class="lg:col-span-7 space-y-gutter">
+            <div id="mastering-rack-card" class="glass-panel rounded-xl overflow-hidden shadow-2xl disabled">
+                
+                <!-- 랙 헤더 디자인 -->
+                <div class="bg-surface-container-high px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 rounded-full bg-primary-fixed led-pulse shadow-[0_0_8px_rgba(0,240,255,0.6)]"></div>
+                        <h2 class="font-data-mono text-xs tracking-widest text-on-surface-variant">MASTERING CONTROL PANEL v5.0</h2>
+                    </div>
+                    <div class="flex space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        <span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+                        <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                    </div>
+                </div>
+                
+                <!-- 랙 가로 슬라이더 세부 모듈 -->
+                <div class="p-5 space-y-6">
+                    
+                    <!-- 1. 3-BAND ANALOG EQ -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-outline">01. 3-BAND ANALOG EQ (주파수 균형 조절)</span>
+                            <span id="led-eq" class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">BASS (저음)</span>
+                                    <span id="val-eq-bass" class="text-primary-fixed font-bold">0.0 dB</span>
+                                </div>
+                                <input id="slider-eq-bass" class="custom-slider rack-slider" type="range" min="-6" max="6" value="0" step="0.1" disabled/>
+                                <p class="text-[8px] text-outline">낮추면 단단해지고 높이면 풍부해짐</p>
+                            </div>
+                            
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">MID (중음)</span>
+                                    <span id="val-eq-mid" class="text-secondary-fixed font-bold">0.0 dB</span>
+                                </div>
+                                <input id="slider-eq-mid" class="custom-slider rack-slider" type="range" min="-6" max="6" value="0" step="0.1" disabled/>
+                                <p class="text-[8px] text-outline">보컬 목소리 전달력 및 악기 선명도</p>
+                            </div>
+                            
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">TREBLE (고음)</span>
+                                    <span id="val-eq-treble" class="text-primary-fixed font-bold">0.0 dB</span>
+                                </div>
+                                <input id="slider-eq-treble" class="custom-slider rack-slider" type="range" min="-6" max="6" value="0" step="0.1" disabled/>
+                                <p class="text-[8px] text-outline">치찰음 제어 및 머리 위 공기감 조절</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. ANALOG SATURATION -->
+                    <div class="space-y-3 pt-3 border-t border-white/5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-outline">02. ANALOG SATURATION (따뜻한 배음 추가)</span>
+                            <span id="led-sat" class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">DRIVE (배음 강도)</span>
+                                    <span id="val-sat-drive" class="text-secondary-fixed font-bold">20 %</span>
+                                </div>
+                                <input id="slider-sat-drive" class="custom-slider rack-slider" type="range" min="0" max="100" value="20" step="1" disabled/>
+                                <p class="text-[8px] text-outline">진공관 오버드라이브식 아날로그 질감</p>
+                            </div>
+                            
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">DRY / WET MIX</span>
+                                    <span id="val-sat-mix" class="text-on-surface-variant font-bold">10 %</span>
+                                </div>
+                                <input id="slider-sat-mix" class="custom-slider rack-slider" type="range" min="0" max="100" value="10" step="1" disabled/>
+                                <p class="text-[8px] text-outline">원래 소리에 배음을 섞는 비율</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 3. DYNAMICS COMPRESSOR -->
+                    <div class="space-y-3 pt-3 border-t border-white/5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-outline">03. DYNAMICS COMPRESSOR (볼륨 균일화)</span>
+                            <span id="led-comp" class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">THRESHOLD</span>
+                                    <span id="val-comp-threshold" class="text-on-surface font-bold">-16 dB</span>
+                                </div>
+                                <input id="slider-comp-threshold" class="custom-slider rack-slider" type="range" min="-40" max="0" value="-16" step="1" disabled/>
+                                <p class="text-[8px] text-outline">압축 기준 문턱값 조율</p>
+                            </div>
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">RATIO (압축비)</span>
+                                    <span id="val-comp-ratio" class="text-on-surface font-bold">1.5:1</span>
+                                </div>
+                                <input id="slider-comp-ratio" class="custom-slider rack-slider" type="range" min="1" max="4" value="1.5" step="0.1" disabled/>
+                                <p class="text-[8px] text-outline">소리가 압축되는 단단한 비율</p>
+                            </div>
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">COMP AMOUNT</span>
+                                    <span id="val-comp-amount" class="text-on-surface font-bold">25 %</span>
+                                </div>
+                                <input id="slider-comp-amount" class="custom-slider rack-slider" type="range" min="0" max="100" value="25" step="1" disabled/>
+                                <p class="text-[8px] text-outline">실제 압축이 얹히는 강도</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 4. STEREO IMAGER -->
+                    <div class="space-y-3 pt-3 border-t border-white/5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-outline">04. STEREO IMAGER (공간감 범위 넓히기)</span>
+                            <span id="led-wide" class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">WIDTH (공간 넓이)</span>
+                                    <span id="val-wide-width" class="text-primary-fixed font-bold">120 %</span>
+                                </div>
+                                <input id="slider-wide-width" class="custom-slider rack-slider" type="range" min="50" max="200" value="120" step="1" disabled/>
+                                <p class="text-[8px] text-outline">소리가 좌우로 펴지는 입체감</p>
+                            </div>
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">HAAS DELAY</span>
+                                    <span id="val-wide-delay" class="text-on-surface-variant font-bold">8 ms</span>
+                                </div>
+                                <input id="slider-wide-delay" class="custom-slider rack-slider" type="range" min="0" max="30" value="8" step="1" disabled/>
+                                <p class="text-[8px] text-outline">양쪽 귀 도달 시간차(ms) 입체 위상</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 5. BRICKWALL LIMITER -->
+                    <div class="space-y-3 pt-3 border-t border-white/5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-error font-bold">05. BRICKWALL LIMITER & MAXIMIZER</span>
+                            <span class="w-2 h-2 rounded-full bg-error led-pulse shadow-[0_0_5px_#ffb4ab]"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-7 space-y-3">
+                                <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1">
+                                    <div class="flex justify-between font-data-mono text-[10px]">
+                                        <span class="text-on-surface-variant">INPUT GAIN (소리 키우기)</span>
+                                        <span id="val-limiter-gain" class="text-primary-fixed font-bold">+2.5 dB</span>
+                                    </div>
+                                    <input id="slider-limiter-gain" class="custom-slider rack-slider" type="range" min="0" max="6" value="2.5" step="0.1" disabled/>
+                                    <p class="text-[8px] text-outline">디지털 깨짐 없이 볼륨을 증폭</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 실시간 Gain Reduction 메터 -->
+                            <div class="md:col-span-5 flex flex-col justify-center">
+                                <div class="gain-reduction-meter-box bg-surface-container-low p-3.5 rounded-lg border border-white/5 space-y-2">
+                                    <div class="flex justify-between text-[9px] font-bold text-outline">
+                                        <span>GAIN REDUCTION (압축 감쇄량)</span>
+                                        <span id="gr-meter-val" class="font-data-mono text-error font-bold">0.0 dB</span>
+                                    </div>
+                                    <div class="w-full h-2.5 bg-black/40 rounded overflow-hidden border border-white/5 relative">
+                                        <div id="gr-meter-fill" class="h-full bg-gradient-to-r from-error to-error-container transition-all duration-100" style="width: 0%"></div>
+                                    </div>
+                                    <span class="text-[8px] text-outline block leading-tight">압축이 걸려 깎여 나간 레벨을 시각화합니다.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- 플레이어 컨트롤 카드 (Player Card) -->
+            <div id="player-card" class="glass-panel p-5 rounded-xl space-y-4 disabled">
+                <div class="flex items-center space-x-2 mb-1">
+                    <span class="material-symbols-outlined text-secondary-fixed text-base">music_note</span>
+                    <h4 class="font-headline-md text-on-surface text-sm">실시간 플레이어 컨트롤</h4>
+                </div>
+                
+                <div class="player-controls-row flex items-center gap-4">
+                    <button id="btn-play-pause" class="w-12 h-12 rounded-full bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container font-bold text-lg flex items-center justify-center shadow-lg hover:brightness-110 active:scale-95 transition disabled:opacity-40" disabled>
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    
+                    <div class="progress-container flex-1 flex items-center gap-3">
+                        <span id="current-time" class="text-xs font-data-mono text-outline">0:00</span>
+                        <input id="progress-slider" class="flex-1 h-1.5 bg-surface-container-lowest rounded-lg appearance-none cursor-pointer outline-none" type="range" min="0" value="0" step="0.1" disabled/>
+                        <span id="total-time" class="text-xs font-data-mono text-outline">0:00</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center pt-2">
+                    <div class="bypass-control flex items-center gap-3 bg-surface-container-low px-4 py-1.5 rounded-full border border-white/5">
+                        <span class="raw-label text-[10px] text-outline transition font-bold">오리지널 (Before)</span>
+                        <label class="switch">
+                            <input type="checkbox" id="bypass-toggle" disabled checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <span class="mastered-label text-[10px] text-primary-fixed transition font-bold active">마스터링 필터 적용 (After)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 내보내기 & 공유 카드 (Export Card) -->
+            <div id="export-card" class="glass-panel p-5 rounded-xl space-y-4 disabled">
+                <div class="flex items-center space-x-2 mb-1">
+                    <span class="material-symbols-outlined text-primary-fixed text-base">download</span>
+                    <h4 class="font-headline-md text-primary-fixed text-sm">마스터링 결과 추출 (Export Suite)</h4>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <span class="material-symbols-outlined text-primary-fixed text-sm">file_download</span>
+                            <span class="font-body-md text-xs text-on-surface truncate max-w-[280px]">유통 규격 마스터링 WAV 저장</span>
+                        </div>
+                        <button id="btn-export-wav" class="px-4 py-1.5 bg-gradient-to-r from-primary-fixed-dim to-secondary-fixed text-on-primary font-bold text-xs rounded shadow hover:brightness-110 transition active:scale-95" disabled>
+                            WAV 저장하기
+                        </button>
+                    </div>
+                    
+                    <!-- 내보내기 진행 프로그레스 바 -->
+                    <div id="export-progress-container" class="hidden space-y-2">
+                        <div class="w-full h-1.5 bg-surface-container-lowest rounded-full overflow-hidden border border-white/5">
+                            <div id="export-progress-fill" class="h-full bg-gradient-to-r from-primary-fixed-dim to-secondary-fixed shadow-[0_0_10px_rgba(0,240,255,0.4)]" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-outline">
+                            <span id="export-status-text">이펙터 연산 처리 중...</span>
+                            <span id="export-percentage">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- 모바일 최적화 바텀 탭 -->
+<footer class="md:hidden fixed bottom-0 left-0 w-full h-16 bg-surface/90 backdrop-blur-xl border-t border-white/10 z-50 flex justify-around items-center">
+    <button class="material-symbols-outlined text-primary-fixed" onclick="alert('대기열에 파일을 드롭하여 마스터링을 시작하세요!')">grid_view</button>
+    <button class="material-symbols-outlined text-outline" onclick="document.getElementById('drop-zone').click()">add_circle</button>
+</footer>
+
+<!-- 1. 글로벌 유통 가이드 모달 -->
+<div id="modal-guide" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+    <div class="glass-panel w-full max-w-lg rounded-xl overflow-hidden shadow-2xl border border-white/10 m-4">
+        <div class="bg-surface-container-high px-6 py-4 border-b border-white/10 flex justify-between items-center">
+            <h3 class="font-headline-md text-primary-fixed text-sm font-bold flex items-center gap-2">
+                <i class="fa-solid fa-circle-info"></i> 글로벌 음원 유통 심사 가이드
+            </h3>
+            <button id="btn-close-guide" class="text-outline hover:text-white transition-colors">&times;</button>
+        </div>
+        <div class="p-6 space-y-4 text-xs leading-relaxed max-h-[70vh] overflow-y-auto">
+            <div class="bg-primary-fixed/5 p-3.5 rounded border border-primary-fixed/20 space-y-1">
+                <h4 class="font-bold text-primary-fixed">1. 무손실 WAV 포맷 제출 (100% 충족)</h4>
+                <p class="text-on-surface-variant">디토뮤직, 멜론, 스포티파이 등 모든 유통사는 MP3 제출을 거절합니다. 본 SunoMaster의 내보내기는 16-bit/44.1kHz 무손실 WAV로 포맷이 영구 고정되어 있어 100% 합격 규격입니다.</p>
+            </div>
+            
+            <div class="bg-secondary-fixed/5 p-3.5 rounded border border-secondary-fixed/20 space-y-1">
+                <h4 class="font-bold text-secondary-fixed">2. 트루 피크 -1.0dBTP 절대 규정 (100% 충족)</h4>
+                <p class="text-on-surface-variant">플랫폼 재생기에서 강제로 소리를 압착할 때 음원이 찢어지는 현상을 방지해야 합니다. 본 엔진은 피크 최대 마진을 -1.0dBFS로 자동 고정해 음질 페널티를 완벽 우회합니다.</p>
+            </div>
+            
+            <div class="bg-surface-container-low p-3.5 rounded border border-white/5 space-y-1">
+                <h4 class="font-bold text-on-surface">3. 앨범 커버 및 가사 매칭 팁 (유저 필수 확인)</h4>
+                <p class="text-outline">유통사에 음원을 제출할 때는 오디오 메타데이터의 곡명/아티스트명과 앨범 커버 이미지 내의 텍스트가 글자 하나 틀림없이 동일해야 심사가 거절되지 않습니다.</p>
+            </div>
+        </div>
+        <div class="bg-surface-container px-6 py-4 border-t border-white/10 flex justify-end">
+            <button id="btn-close-guide-ok" class="px-5 py-1.5 bg-primary text-on-primary font-bold rounded text-xs hover:brightness-110 active:scale-95 transition">확인했습니다</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. 라이브러리 작업 이력 서랍 모달 -->
+<div id="modal-library" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+    <div class="glass-panel w-full max-w-xl rounded-xl overflow-hidden shadow-2xl border border-white/10 m-4">
+        <div class="bg-surface-container-high px-6 py-4 border-b border-white/10 flex justify-between items-center">
+            <h3 class="font-headline-md text-secondary-fixed text-sm font-bold flex items-center gap-2">
+                <i class="fa-solid fa-box-archive"></i> Library 마스터링 히스토리 보관함
+            </h3>
+            <button id="btn-close-library" class="text-outline hover:text-white transition-colors">&times;</button>
+        </div>
+        <div class="p-6 space-y-4">
+            <p class="text-outline text-[11px] leading-relaxed">이번 세션 동안 마스터링을 완료하고 저장한 음원의 작업 이력 데이터베이스입니다. 작업 내역을 클릭하면 **당시 이펙터 슬라이더의 설정값(Recall)**을 실시간으로 다시 랙 조작반에 불러올 수 있습니다!</p>
+            
+            <div class="border border-white/5 rounded-lg overflow-hidden bg-surface-container-lowest/50">
+                <table class="w-full text-[11px] text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-high border-b border-white/10 text-outline">
+                            <th class="p-3">음원명 (Track Name)</th>
+                            <th class="p-3 text-center">장르/성향</th>
+                            <th class="p-3 text-right">설정값 리콜</th>
+                        </tr>
+                    </thead>
+                    <tbody id="library-history-list" class="divide-y divide-white/5">
+                        <tr>
+                            <td colspan="3" class="p-6 text-center text-outline">저장 완료된 마스터링 히스토리가 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="bg-surface-container px-6 py-4 border-t border-white/10 flex justify-between items-center">
+            <button id="btn-clear-library" class="text-[10px] text-error hover:underline bg-none border-none cursor-pointer">이력 전체 삭제</button>
+            <button id="btn-close-library-ok" class="px-5 py-1.5 bg-secondary-container text-on-secondary-container font-bold rounded text-xs hover:brightness-110 active:scale-95 transition">닫기</button>
+        </div>
+    </div>
+</div>
+
+<footer class="py-8 text-center text-xs text-outline border-t border-white/5 mt-12">
+    <p>&copy; 2026 SunoMaster AI. Web Audio API-driven Studio Engine. No files uploaded to server.</p>
+</footer>
+
+<!-- JS 인라인 번들링 병합 -->
+<script>
+// ==========================================
+// 1. presets.js
+// ==========================================
+const MASTERING_PRESETS = {
+    pop: {
+        name: "Universal / Pop (원음 비율 보존 및 음압 극대화)",
+        description: "수노 원본의 주파수 대역 비율을 정교하게 보존하면서, 12kHz 에어 쉘프로 화사함과 적정 LUFS 음압만 고르게 상승시킵니다.",
+        eq: { bass: 0.8, mid: 0.1, treble: 0.8 },
+        saturation: { drive: 3, mix: 8 },
+        compressor: { threshold: -16, ratio: 1.4, amount: 25, attack: 0.030, release: 0.100 },
+        stereoWidth: { width: 120, delay: 8 },
+        limiter: { gain: 2.5 }
+    },
+    hiphop: {
+        name: "Fire / Hip-Hop (저음역 펀치감 및 타격감 극대화)",
+        description: "저음역 비트 킥의 어택을 묵직하게 극대화하며, 컴프레서의 단단한 다이내믹 홀드로 강력한 에너지를 발산합니다.",
+        eq: { bass: 1.8, mid: -0.3, treble: 0.5 },
+        saturation: { drive: 6, mix: 15 },
+        compressor: { threshold: -14, ratio: 1.6, amount: 35, attack: 0.040, release: 0.080 },
+        stereoWidth: { width: 115, delay: 10 },
+        limiter: { gain: 3.2 }
+    },
+    ballad: {
+        name: "Clarity / Ballad (보컬 해상도 강화 및 중음역 정리)",
+        description: "답답한 중음역 노이즈를 정리하고 고역의 투명도를 확보하여, 보컬과 악기 사이의 거리를 넓혀 공간감과 분리도를 극대화합니다.",
+        eq: { bass: 0.8, mid: 0.3, treble: -1.2 },
+        saturation: { drive: 4, mix: 12 },
+        compressor: { threshold: -18, ratio: 1.2, amount: 15, attack: 0.045, release: 0.200 },
+        stereoWidth: { width: 122, delay: 12 },
+        limiter: { gain: 1.8 }
+    },
+    lofi: {
+        name: "Tape / Lo-Fi (아날로그 테이프 질감 및 고음역 롤오프)",
+        description: "디지털 특유의 찌르는 노이즈를 깎아내기 위해 고음역대를 고의로 롤오프시키고, 진공관 배음 왜곡(Saturation)을 높여 몽환적인 감성을 더합니다.",
+        eq: { bass: 1.5, mid: -0.5, treble: -3.0 },
+        saturation: { drive: 12, mix: 22 },
+        compressor: { threshold: -15, ratio: 1.5, amount: 30, attack: 0.035, release: 0.150 },
+        stereoWidth: { width: 103, delay: 4 },
+        limiter: { gain: 2.2 }
+    },
+    rock: {
+        name: "Punch / Rock (단단한 중역대 악기 타격 튜닝)",
+        description: "일렉기타와 드럼의 미드레인지 타격을 보강하고 파워풀한 에너지 레벨을 보장합니다.",
+        eq: { bass: 0.3, mid: 0.8, treble: 0.5 },
+        saturation: { drive: 8, mix: 18 },
+        compressor: { threshold: -12, ratio: 1.8, amount: 40, attack: 0.025, release: 0.090 },
+        stereoWidth: { width: 108, delay: 6 },
+        limiter: { gain: 3.0 }
+    },
+    jazzrnb: {
+        name: "Clarity / Jazz R&B (보컬 및 공간 극대화)",
+        description: "재즈 R&B 장르 특유의 풍부한 중저음 비트를 부드럽게 지탱하고, 보컬의 분리도를 키우면서 넓은 입체 공간감을 만들어 줍니다.",
+        eq: { bass: 1.2, mid: 0.4, treble: 1.0 },
+        saturation: { drive: 5, mix: 10 },
+        compressor: { threshold: -16, ratio: 1.3, amount: 20, attack: 0.035, release: 0.120 },
+        stereoWidth: { width: 125, delay: 14 },
+        limiter: { gain: 2.8 }
+    }
+};
+</script>
+
+<script>
+// ==========================================
+// 2. audioAnalyzer.js
+// ==========================================
+const AudioAnalyzer = {
+    async analyze(audioBuffer) {
+        const duration = audioBuffer.duration;
+        const sampleRate = audioBuffer.sampleRate;
+        const startSec = Math.max(0, Math.min(15, duration - 30));
+        const analyzeSec = Math.min(30, duration - startSec);
+        const startSample = Math.floor(startSec * sampleRate);
+        const sampleLength = Math.floor(analyzeSec * sampleRate);
+        const channelData = audioBuffer.getChannelData(0);
+        let sumSquared = 0;
+        let maxAbsoluteVal = 0;
+        let scanSamples = Math.min(sampleLength, channelData.length - startSample);
+        if (scanSamples <= 0) scanSamples = channelData.length;
+        const step = 32;
+        let count = 0;
+        
+        for (let i = startSample; i < startSample + scanSamples; i += step) {
+            const sample = channelData[i];
+            sumSquared += sample * sample;
+            const absVal = Math.abs(sample);
+            if (absVal > maxAbsoluteVal) {
+                maxAbsoluteVal = absVal;
+            }
+            count++;
+        }
+        const rms = Math.sqrt(sumSquared / count) || 0.05;
+        const rmsdB = 20 * Math.log10(Math.max(rms, 0.0001));
+        
+        const crestFactor = maxAbsoluteVal / rms;
+        const normalizedCrest = Math.max(0.1, Math.min(0.8, crestFactor / 10));
+        
+        let lowRatio = 0.35;
+        let midRatio = 0.40;
+        let highRatio = 0.25;
+        
+        try {
+            const offlineCtx = new OfflineAudioContext(2, scanSamples, sampleRate);
+            const bufferSource = offlineCtx.createBufferSource();
+            const subBuffer = offlineCtx.createBuffer(1, scanSamples, sampleRate);
+            const subChannelData = subBuffer.getChannelData(0);
+            for (let i = 0; i < scanSamples; i++) {
+                subChannelData[i] = channelData[startSample + i] || 0;
+            }
+            bufferSource.buffer = subBuffer;
+            
+            const lowpass = offlineCtx.createBiquadFilter();
+            lowpass.type = 'lowpass';
+            lowpass.frequency.value = 200;
+            const highpass = offlineCtx.createBiquadFilter();
+            highpass.type = 'highpass';
+            highpass.frequency.value = 4500;
+            const merger = offlineCtx.createChannelMerger(2);
+            
+            bufferSource.connect(lowpass);
+            bufferSource.connect(highpass);
+            lowpass.connect(merger, 0, 0);
+            highpass.connect(merger, 0, 1);
+            merger.connect(offlineCtx.destination);
+            bufferSource.start(0);
+            
+            const renderPromise = offlineCtx.startRendering();
+            const renderTimeout = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error("오프라인 렌더링 시간 초과")), 5000);
+            });
+            const renderedBuffer = await Promise.race([renderPromise, renderTimeout]);
+            const lowData = renderedBuffer.getChannelData(0);
+            const highData = renderedBuffer.getChannelData(1);
+            let lowSum = 0, highSum = 0;
+            let filterCount = 0;
+            for (let i = 0; i < lowData.length; i += step) {
+                lowSum += lowData[i] * lowData[i];
+                highSum += highData[i] * highData[i];
+                filterCount++;
+            }
+            const lowRms = Math.sqrt(lowSum / filterCount) || 0.01;
+            const highRms = Math.sqrt(highSum / filterCount) || 0.01;
+            const midRms = Math.max(0.02, rms - (lowRms * 0.35 + highRms * 0.35));
+            const totalEnergy = (lowRms + midRms + highRms) || 0.0001;
+            lowRatio = lowRms / totalEnergy;
+            midRatio = midRms / totalEnergy;
+            highRatio = highRms / totalEnergy;
+        } catch (offlineError) {
+            let jsLowSum = 0;
+            let jsHighSum = 0;
+            let prevSample = 0;
+            let jsCount = 0;
+            for (let i = startSample; i < startSample + scanSamples; i += step) {
+                const sample = channelData[i] || 0;
+                const lowSample = (sample + prevSample) / 2;
+                jsLowSum += lowSample * lowSample;
+                const highSample = sample - prevSample;
+                jsHighSum += highSample * highSample;
+                prevSample = sample;
+                jsCount++;
+            }
+            const jsLowRms = Math.sqrt(jsLowSum / jsCount) || 0.01;
+            const jsHighRms = Math.sqrt(jsHighSum / jsCount) || 0.01;
+            const jsMidRms = Math.max(0.02, rms - (jsLowRms * 0.4 + jsHighRms * 0.4));
+            const jsTotal = (jsLowRms + jsMidRms + jsHighRms) || 0.0001;
+            lowRatio = jsLowRms / jsTotal;
+            midRatio = jsMidRms / jsTotal;
+            highRatio = jsHighRms / jsTotal;
+        }
+        
+        const templates = {
+            pop: [0.38, 0.38, 0.24, 0.30],
+            hiphop: [0.55, 0.30, 0.15, 0.28],
+            rock: [0.36, 0.40, 0.24, 0.23],
+            ballad: [0.32, 0.46, 0.22, 0.42],
+            lofi: [0.45, 0.42, 0.13, 0.26],
+            jazzrnb: [0.46, 0.36, 0.18, 0.35]
+        };
+        const distances = {};
+        let totalInverseDistance = 0;
+        for (const [genre, coord] of Object.entries(templates)) {
+            const dist = Math.sqrt(
+                Math.pow(lowRatio - coord[0], 2) +
+                Math.pow(midRatio - coord[1], 2) +
+                Math.pow(highRatio - coord[2], 2) +
+                Math.pow(normalizedCrest - coord[3], 2)
+            );
+            const safetyDist = Math.max(dist, 0.01);
+            distances[genre] = 1.0 / safetyDist;
+            totalInverseDistance += distances[genre];
+        }
+        const weights = {};
+        for (const genre in templates) {
+            weights[genre] = distances[genre] / totalInverseDistance;
+        }
+        const blendedParams = {
+            eq: { bass: 0, mid: 0, treble: 0 },
+            saturation: { drive: 0, mix: 0 },
+            compressor: { threshold: 0, ratio: 0, amount: 0 },
+            stereoWidth: { width: 0, delay: 0 },
+            limiter: { gain: 0 }
+        };
+        for (const genre in weights) {
+            const w = weights[genre];
+            const preset = MASTERING_PRESETS[genre];
+            blendedParams.eq.bass += preset.eq.bass * w;
+            blendedParams.eq.mid += preset.eq.mid * w;
+            blendedParams.eq.treble += preset.eq.treble * w;
+            blendedParams.saturation.drive += preset.saturation.drive * w;
+            blendedParams.saturation.mix += preset.saturation.mix * w;
+            blendedParams.compressor.threshold += preset.compressor.threshold * w;
+            blendedParams.compressor.ratio += preset.compressor.ratio * w;
+            blendedParams.compressor.amount += preset.compressor.amount * w;
+            blendedParams.stereoWidth.width += preset.stereoWidth.width * w;
+            blendedParams.stereoWidth.delay += preset.stereoWidth.delay * w;
+        }
+        
+        const sortedGenres = Object.keys(weights).sort((a, b) => weights[b] - weights[a]);
+        const primaryGenre = sortedGenres[0];
+        const secondaryGenre = sortedGenres[1];
+        let recommendedGenre = primaryGenre;
+        let compositeGenreName = "";
+        let explanation = "";
+        
+        if (primaryGenre === "jazzrnb") {
+            compositeGenreName = "Clarity & Dynamic (재즈 R&B)";
+            explanation = "재즈 R&B 특유의 풍성한 저역 킥과 그루브를 부드럽게 지탱하고, 보컬의 선명도와 넓은 스테레오 입체감을 대폭 향상하도록 마스터링 랙을 설정했습니다.";
+        } else if (primaryGenre === "hiphop" && secondaryGenre === "lofi") {
+            compositeGenreName = "Tape & Fire 하이브리드 (로파이 힙합)";
+            explanation = "디지털 노이즈 마감용 고음역 롤오프(Tape) 기술과 저음역 펀치감 극대화(Fire) 알고리즘을 융합하여, 드럼 비트의 펀치감은 살리면서 빈티지하고 따뜻하게 보정했습니다.";
+        } else if (primaryGenre === "ballad" && secondaryGenre === "pop") {
+            compositeGenreName = "Clarity & Universal 하이브리드 (팝 발라드)";
+            explanation = "보컬 해상도를 키우고 중음역을 맑게 다듬는 Clarity 필터와 원음의 대역 비율을 보존한 채 전체 음압만 시원하게 올리는 Universal 랙을 혼합해 보컬 분리도를 극대화했습니다.";
+        } else if (primaryGenre === "pop" && secondaryGenre === "hiphop") {
+            compositeGenreName = "Universal & Fire 하이브리드 (댄스 팝)";
+            explanation = "수노 오리지널의 주파수 대역 비율을 안전하게 유지(Universal)하면서 타격 저음(Fire)만 미세 보강하여 찢어짐 없는 댄스 그루브를 확보했습니다.";
+        } else {
+            const primaryName = MASTERING_PRESETS[primaryGenre].name.split('(')[0].trim();
+            const secondaryName = MASTERING_PRESETS[secondaryGenre].name.split('(')[0].trim();
+            compositeGenreName = `${primaryName} + ${secondaryName} (하이브리드)`;
+            explanation = `음원 프로필 분석 결과, [${primaryName}] 성향(${ (weights[primaryGenre]*100).toFixed(0) }%)과 [${secondaryName}] 성향(${ (weights[secondaryGenre]*100).toFixed(0) }%)이 동시에 보정 대상으로 판별되어 1:1 블렌딩 적용했습니다.`;
+        }
+        
+        let suggestedGain = 3.0;
+        if (rmsdB < -22) suggestedGain = 4.0;
+        else if (rmsdB < -18) suggestedGain = 3.2;
+        else if (rmsdB < -15) suggestedGain = 2.5;
+        else if (rmsdB < -15) suggestedGain = 1.8;
+        else suggestedGain = 1.0;
+        blendedParams.limiter.gain = suggestedGain;
+        
+        return {
+            rmsdB: rmsdB.toFixed(1),
+            lowRatio: (lowRatio * 100).toFixed(0),
+            midRatio: (midRatio * 100).toFixed(0),
+            highRatio: (highRatio * 100).toFixed(0),
+            recommendedGenre,
+            compositeGenreName,
+            reason: explanation,
+            blendedParams
+        };
+    }
+};
+</script>
+
+<script>
+// ==========================================
+// 3. wavEncoder.js
+// ==========================================
+const WavEncoder = {
+    encode(audioBuffer) {
+        const numOfChan = audioBuffer.numberOfChannels;
+        const sampleRate = audioBuffer.sampleRate;
+        const format = 1;
+        const bitDepth = 16;
+        const chanData = [];
+        for (let i = 0; i < numOfChan; i++) {
+            chanData.push(audioBuffer.getChannelData(i));
+        }
+        if (numOfChan === 1) {
+            chanData.push(chanData[0]);
+        }
+        const interleaved = this.interleave(chanData[0], chanData[1]);
+        const buffer = new ArrayBuffer(44 + interleaved.length * 2);
+        const view = new DataView(buffer);
+        
+        this.writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + interleaved.length * 2, true);
+        this.writeString(view, 8, 'WAVE');
+        this.writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, format, true);
+        view.setUint16(22, 2, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 4, true);
+        view.setUint16(32, 4, true);
+        view.setUint16(34, bitDepth, true);
+        this.writeString(view, 36, 'data');
+        view.setUint32(40, interleaved.length * 2, true);
+        
+        let index = 44;
+        for (let i = 0; i < interleaved.length; i++) {
+            let sample = Math.max(-1, Math.min(1, interleaved[i]));
+            // 고음질 삼각 분포 디터링(TPDF Dithering) 적용하여 양자화 왜곡 잡음 차단
+            const dither = (Math.random() - Math.random()) / 32768;
+            let ditheredSample = Math.max(-1, Math.min(1, sample + dither));
+            // 16비트 변환: 양수와 음수 모두 동일하게 32767을 곱하여 왜곡 방지 및 정수형으로 반올림
+            const val = Math.round(ditheredSample * 32767);
+            view.setInt16(index, val, true);
+            index += 2;
+        }
+        return new Blob([view], { type: 'audio/wav' });
+    },
+    interleave(inputL, inputR) {
+        const length = inputL.length + inputR.length;
+        const result = new Float32Array(length);
+        let index = 0;
+        let inputIndex = 0;
+        while (index < length) {
+            result[index++] = inputL[inputIndex];
+            result[index++] = inputR[inputIndex];
+            inputIndex++;
+        }
+        return result;
+    },
+    writeString(view, offset, string) {
+        for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+        }
+    }
+};
+</script>
+
+<script>
+// ==========================================
+// 4. audioEngine.js
+// ==========================================
+class MasteringEngine {
+    constructor() {
+        this.ctx = null;
+        this.audioBuffer = null;
+        this.sourceNode = null;
+        this.rumbleCut = null;
+        this.eqBass = null;
+        this.eqMid = null;
+        this.eqTreble = null;
+        this.airShelf = null;
+        this.saturator = null;
+        this.saturatorMix = null;
+        this.compressor = null;
+        this.stereoDelay = null;
+        this.stereoDry = null;
+        this.stereoWet = null;
+        this.limiterGain = null;
+        this.limiter = null;
+        this.analyser = null;
+        this.dryBranch = null;
+        this.wetBranch = null;
+        this.masterOut = null;
+        this.isBypassed = false;
+        this.isPlaying = false;
+        this.startTime = 0;
+    }
+    init(audioContext, audioBuffer) {
+        this.ctx = audioContext;
+        this.audioBuffer = audioBuffer;
+        this.masterOut = this.ctx.createGain();
+        this.masterOut.connect(this.ctx.destination);
+        this.dryBranch = this.ctx.createGain();
+        this.wetBranch = this.ctx.createGain();
+        this.dryBranch.connect(this.masterOut);
+        this.wetBranch.connect(this.masterOut);
+        this.dryBranch.gain.value = 0.0;
+        this.wetBranch.gain.value = 1.0;
+        this.createNodes();
+        this.connectChain();
+    }
+    createNodes() {
+        const ctx = this.ctx;
+        this.rumbleCut = ctx.createBiquadFilter();
+        this.rumbleCut.type = "highpass";
+        this.rumbleCut.frequency.value = 30;
+        this.rumbleCut.Q.value = 0.707;
+        
+        this.eqBass = ctx.createBiquadFilter();
+        this.eqBass.type = "lowshelf";
+        this.eqBass.frequency.value = 150;
+        this.eqBass.gain.value = 0;
+        
+        this.eqMid = ctx.createBiquadFilter();
+        this.eqMid.type = "peaking";
+        this.eqMid.frequency.value = 1000;
+        this.eqMid.Q.value = 0.9;
+        this.eqMid.gain.value = 0;
+        
+        this.eqTreble = ctx.createBiquadFilter();
+        this.eqTreble.type = "highshelf";
+        this.eqTreble.frequency.value = 6000;
+        this.eqTreble.gain.value = 0;
+        
+        this.airShelf = ctx.createBiquadFilter();
+        this.airShelf.type = "highshelf";
+        this.airShelf.frequency.value = 12000;
+        this.airShelf.gain.value = 1.2;
+        
+        this.saturator = ctx.createWaveShaper();
+        this.saturator.curve = this.makeDistortionCurve(10);
+        this.saturator.oversample = "4x";
+        this.saturatorMix = ctx.createGain();
+        this.saturatorMix.gain.value = 0.1;
+        
+        this.compressor = ctx.createDynamicsCompressor();
+        this.compressor.threshold.value = -16;
+        this.compressor.ratio.value = 1.5;
+        this.compressor.knee.value = 24;
+        this.compressor.attack.value = 0.035;
+        this.compressor.release.value = 0.15;
+        
+        this.stereoDry = ctx.createGain();
+        this.stereoWet = ctx.createGain();
+        this.splitter = ctx.createChannelSplitter(2);
+        this.merger = ctx.createChannelMerger(2);
+        this.stereoDelay = ctx.createDelay(0.1);
+        this.stereoDelay.delayTime.value = 0.015;
+        this.stereoDry.gain.value = 1.0;
+        this.stereoWet.gain.value = 0.25;
+        
+        this.limiterGain = ctx.createGain();
+        this.limiterGain.gain.value = 1.41;
+        this.limiter = ctx.createDynamicsCompressor();
+        this.limiter.threshold.value = -1.0;
+        this.limiter.ratio.value = 12.0;
+        this.limiter.knee.value = 8.0;
+        this.limiter.attack.value = 0.002;
+        this.limiter.release.value = 0.08;
+        
+        this.analyser = ctx.createAnalyser();
+        this.analyser.fftSize = 512;
+    }
+    connectChain() {
+        const ctx = this.ctx;
+        this.rumbleCut.connect(this.eqBass);
+        this.eqBass.connect(this.eqMid);
+        this.eqMid.connect(this.eqTreble);
+        this.eqTreble.connect(this.airShelf);
+        
+        const compInput = ctx.createGain();
+        const saturatorDry = ctx.createGain();
+        this.airShelf.connect(this.saturator);
+        this.saturator.connect(this.saturatorMix);
+        this.saturatorMix.connect(compInput);
+        this.airShelf.connect(saturatorDry);
+        saturatorDry.gain.value = 1.0 - this.saturatorMix.gain.value;
+        saturatorDry.connect(compInput);
+        
+        compInput.connect(this.compressor);
+        const widthInput = this.compressor;
+        const widthOutput = ctx.createGain();
+        
+        widthInput.connect(this.stereoDry);
+        this.stereoDry.connect(widthOutput);
+        widthInput.connect(this.splitter);
+        this.splitter.connect(this.merger, 0, 0);
+        this.splitter.connect(this.stereoDelay, 1);
+        this.stereoDelay.connect(this.merger, 0, 1);
+        this.merger.connect(this.stereoWet);
+        this.stereoWet.connect(widthOutput);
+        
+        widthOutput.connect(this.limiterGain);
+        this.limiterGain.connect(this.limiter);
+        this.limiter.connect(this.wetBranch);
+        this.masterOut.connect(this.analyser);
+    }
+    makeDistortionCurve(amount) {
+        const k = typeof amount === 'number' ? amount : 10;
+        const n_samples = 44100;
+        const curve = new Float32Array(n_samples);
+        const deg = Math.PI / 180;
+        for (let i = 0; i < n_samples; ++i) {
+            const x = (i * 2) / n_samples - 1;
+            curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x) * 20 * deg);
+        }
+        return curve;
+    }
+    updateParameters(type, params) {
+        if (!this.ctx) return;
+        const time = this.ctx.currentTime;
+        const rampTime = time + 0.05;
+        if (type === "eq") {
+            if (params.bass !== undefined) {
+                this.eqBass.gain.setValueAtTime(this.eqBass.gain.value, time);
+                this.eqBass.gain.linearRampToValueAtTime(params.bass, rampTime);
+            }
+            if (params.mid !== undefined) {
+                this.eqMid.gain.setValueAtTime(this.eqMid.gain.value, time);
+                this.eqMid.gain.linearRampToValueAtTime(params.mid, rampTime);
+            }
+            if (params.treble !== undefined) {
+                this.eqTreble.gain.setValueAtTime(this.eqTreble.gain.value, time);
+                this.eqTreble.gain.linearRampToValueAtTime(params.treble, rampTime);
+                const airGain = Math.max(0.5, 1.2 + (params.treble * 0.15));
+                this.airShelf.gain.setValueAtTime(this.airShelf.gain.value, time);
+                this.airShelf.gain.linearRampToValueAtTime(airGain, rampTime);
+            }
+        } else if (type === "saturation") {
+            if (params.drive !== undefined) {
+                this.saturator.curve = this.makeDistortionCurve(params.drive);
+            }
+            if (params.mix !== undefined) {
+                const wetVal = params.mix / 100;
+                this.saturatorMix.gain.setValueAtTime(this.saturatorMix.gain.value, time);
+                this.saturatorMix.gain.linearRampToValueAtTime(wetVal, rampTime);
+            }
+        } else if (type === "compressor") {
+            if (params.threshold !== undefined) {
+                this.compressor.threshold.setValueAtTime(this.compressor.threshold.value, time);
+                this.compressor.threshold.linearRampToValueAtTime(params.threshold, rampTime);
+            }
+            if (params.ratio !== undefined) {
+                this.compressor.ratio.setValueAtTime(this.compressor.ratio.value, time);
+                this.compressor.ratio.linearRampToValueAtTime(params.ratio, rampTime);
+            }
+            if (params.amount !== undefined) {
+                const amountFactor = params.amount / 100;
+                const targetRatio = 1.0 + (this.compressor.ratio.value - 1.0) * amountFactor;
+                this.compressor.ratio.setValueAtTime(this.compressor.ratio.value, time);
+                this.compressor.ratio.linearRampToValueAtTime(targetRatio, rampTime);
+            }
+            if (params.attack !== undefined) {
+                this.compressor.attack.setValueAtTime(this.compressor.attack.value, time);
+                this.compressor.attack.linearRampToValueAtTime(params.attack, rampTime);
+            }
+            if (params.release !== undefined) {
+                this.compressor.release.setValueAtTime(this.compressor.release.value, time);
+                this.compressor.release.linearRampToValueAtTime(params.release, rampTime);
+            }
+        } else if (type === "width") {
+            if (params.width !== undefined) {
+                const widthFactor = (params.width - 100) / 150;
+                const targetWet = 0.6 * widthFactor;
+                const targetDry = 1.0 - (0.3 * widthFactor);
+                this.stereoWet.gain.setValueAtTime(this.stereoWet.gain.value, time);
+                this.stereoWet.gain.linearRampToValueAtTime(targetWet, rampTime);
+                this.stereoDry.gain.setValueAtTime(this.stereoDry.gain.value, time);
+                this.stereoDry.gain.linearRampToValueAtTime(targetDry, rampTime);
+            }
+            if (params.delay !== undefined) {
+                this.stereoDelay.delayTime.setValueAtTime(this.stereoDelay.delayTime.value, time);
+                this.stereoDelay.delayTime.linearRampToValueAtTime(params.delay / 1000, rampTime);
+            }
+        } else if (type === "limiter") {
+            if (params.gain !== undefined) {
+                const gainRatio = Math.pow(10, params.gain / 20);
+                this.limiterGain.gain.setValueAtTime(this.limiterGain.gain.value, time);
+                this.limiterGain.gain.linearRampToValueAtTime(gainRatio, rampTime);
+            }
+        }
+    }
+    setBypass(bypass) {
+        this.isBypassed = bypass;
+        if (!this.ctx) return;
+        const time = this.ctx.currentTime;
+        const rampTime = time + 0.08;
+        this.dryBranch.gain.setValueAtTime(this.dryBranch.gain.value, time);
+        this.wetBranch.gain.setValueAtTime(this.wetBranch.gain.value, time);
+        if (bypass) {
+            this.dryBranch.gain.linearRampToValueAtTime(1.0, rampTime);
+            this.wetBranch.gain.linearRampToValueAtTime(0.0, rampTime);
+        } else {
+            this.dryBranch.gain.linearRampToValueAtTime(0.0, rampTime);
+            this.wetBranch.gain.linearRampToValueAtTime(1.0, rampTime);
+        }
+    }
+    getGainReduction() {
+        if (!this.limiter) return 0;
+        const reduction = this.limiter.reduction;
+        const val = typeof reduction === 'number' ? reduction : (reduction.value || 0);
+        return Math.abs(val);
+    }
+    play(offset = 0, onEndedCallback = null) {
+        if (this.isPlaying) return;
+        this.sourceNode = this.ctx.createBufferSource();
+        this.sourceNode.buffer = this.audioBuffer;
+        this.sourceNode.connect(this.rumbleCut);
+        this.sourceNode.connect(this.dryBranch);
+        this.startTime = this.ctx.currentTime - offset;
+        this.sourceNode.start(0, offset);
+        this.isPlaying = true;
+        this.sourceNode.onended = () => {
+            const curPlayTime = this.ctx.currentTime - this.startTime;
+            if (curPlayTime >= this.audioBuffer.duration - 0.1) {
+                this.isPlaying = false;
+                if (onEndedCallback) onEndedCallback();
+            }
+        };
+    }
+    stop() {
+        if (!this.isPlaying) return;
+        try {
+            this.sourceNode.stop();
+        } catch (e) {}
+        this.isPlaying = false;
+    }
+    async renderOffline(rawBuffer, currentParams, progressCallback) {
+        const sampleRate = rawBuffer.sampleRate;
+        const length = rawBuffer.length;
+        const offlineCtx = new OfflineAudioContext(2, length, sampleRate);
+        const source = offlineCtx.createBufferSource();
+        source.buffer = rawBuffer;
+        const rCut = offlineCtx.createBiquadFilter();
+        rCut.type = "highpass";
+        rCut.frequency.value = 30;
+        rCut.Q.value = 0.707;
+        const eqB = offlineCtx.createBiquadFilter();
+        eqB.type = "lowshelf";
+        eqB.frequency.value = 150;
+        eqB.gain.value = currentParams.eq.bass;
+        const eqM = offlineCtx.createBiquadFilter();
+        eqM.type = "peaking";
+        eqM.frequency.value = 1000;
+        eqM.Q.value = 0.9;
+        eqM.gain.value = currentParams.eq.mid;
+        const eqT = offlineCtx.createBiquadFilter();
+        eqT.type = "highshelf";
+        eqT.frequency.value = 6000;
+        eqT.gain.value = currentParams.eq.treble;
+        const aShelf = offlineCtx.createBiquadFilter();
+        aShelf.type = "highshelf";
+        aShelf.frequency.value = 12000;
+        aShelf.gain.value = Math.max(0.5, 1.2 + (currentParams.eq.treble * 0.15));
+        const sat = offlineCtx.createWaveShaper();
+        const k = currentParams.saturation.drive;
+        const n_samples = 44100;
+        const curve = new Float32Array(n_samples);
+        const deg = Math.PI / 180;
+        for (let i = 0; i < n_samples; ++i) {
+            const x = (i * 2) / n_samples - 1;
+            curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x) * 20 * deg);
+        }
+        sat.curve = curve;
+        sat.oversample = "4x";
+        const satMix = offlineCtx.createGain();
+        satMix.gain.value = currentParams.saturation.mix / 100;
+        const satDry = offlineCtx.createGain();
+        satDry.gain.value = 1.0 - satMix.gain.value;
+        const compIn = offlineCtx.createGain();
+        const comp = offlineCtx.createDynamicsCompressor();
+        comp.threshold.value = currentParams.compressor.threshold;
+        comp.knee.value = 24;
+        comp.attack.value = currentParams.compressor.attack !== undefined ? currentParams.compressor.attack : 0.035;
+        comp.release.value = currentParams.compressor.release !== undefined ? currentParams.compressor.release : 0.15;
+        const amountFactor = currentParams.compressor.amount / 100;
+        comp.ratio.value = 1.0 + (currentParams.compressor.ratio - 1.0) * amountFactor;
+        const sDry = offlineCtx.createGain();
+        const sWet = offlineCtx.createGain();
+        const split = offlineCtx.createChannelSplitter(2);
+        const merge = offlineCtx.createChannelMerger(2);
+        const sDelay = offlineCtx.createDelay(0.1);
+        sDelay.delayTime.value = currentParams.stereoWidth.delay / 1000;
+        const widthFactor = (currentParams.stereoWidth.width - 100) / 150;
+        sWet.gain.value = 0.6 * widthFactor;
+        sDry.gain.value = 1.0 - (0.3 * widthFactor);
+        const wOut = offlineCtx.createGain();
+        const limGain = offlineCtx.createGain();
+        limGain.gain.value = Math.pow(10, currentParams.limiter.gain / 20);
+        const lim = offlineCtx.createDynamicsCompressor();
+        lim.threshold.value = -1.0;
+        lim.ratio.value = 12.0;
+        lim.knee.value = 8.0;
+        lim.attack.value = 0.002;
+        lim.release.value = 0.08;
+        
+        source.connect(rCut);
+        rCut.connect(eqB);
+        eqB.connect(eqM);
+        eqM.connect(eqT);
+        eqT.connect(aShelf);
+        aShelf.connect(sat);
+        sat.connect(satMix);
+        satMix.connect(compIn);
+        aShelf.connect(satDry);
+        satDry.connect(compIn);
+        compIn.connect(comp);
+        comp.connect(sDry);
+        sDry.connect(wOut);
+        comp.connect(split);
+        split.connect(merge, 0, 0);
+        split.connect(sDelay, 1);
+        sDelay.connect(merge, 0, 1);
+        merge.connect(sWet);
+        sWet.connect(wOut);
+        wOut.connect(limGain);
+        limGain.connect(lim);
+        lim.connect(offlineCtx.destination);
+        source.start(0);
+        
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += 12;
+            if (progress > 95) progress = 95;
+            if (progressCallback) progressCallback(progress);
+        }, 150);
+        const outputBuffer = await offlineCtx.startRendering();
+        clearInterval(progressInterval);
+        if (progressCallback) progressCallback(100);
+        return outputBuffer;
+    }
+}
+</script>
+
+<script>
+// ==========================================
+// 5. app.js
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    let audioCtx = null;
+    const engine = new MasteringEngine();
+    let tracks = [];
+    let activeTrackId = null;
+    let isBatchExporting = false;
+    
+    const currentParams = {
+        eq: { bass: 0, mid: 0, treble: 0 },
+        saturation: { drive: 0, mix: 0 },
+        compressor: { threshold: 0, ratio: 1.0, amount: 0 },
+        stereoWidth: { width: 100, delay: 0 },
+        limiter: { gain: 0 }
+    };
+    let isPlaying = false;
+    let playbackOffset = 0;
+    let playStartTime = 0;
+    let timerInterval = null;
+    let animationFrameId = null;
+    
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('audio-file-input');
+    const trackQueueCard = document.getElementById('track-queue-card');
+    const queueList = document.getElementById('queue-list');
+    const btnBatchExport = document.getElementById('btn-batch-export');
+    const analysisPanel = document.getElementById('analysis-panel');
+    const displayFileName = document.getElementById('display-file-name');
+    const displayDuration = document.getElementById('display-duration');
+    const analyzerLoading = document.getElementById('analyzer-loading');
+    const analyzerResults = document.getElementById('analyzer-results');
+    const detectedGenre = document.getElementById('detected-genre');
+    const analysisReason = document.getElementById('analysis-reason');
+    const originalRms = document.getElementById('original-rms');
+    const lowEnergy = document.getElementById('low-energy');
+    const highHarshness = document.getElementById('high-harshness');
+    const visualizerCanvas = document.getElementById('visualizer-canvas');
+    const canvasWrapper = visualizerCanvas.parentElement;
+    const playerCard = document.getElementById('player-card');
+    const btnPlayPause = document.getElementById('btn-play-pause');
+    const progressSlider = document.getElementById('progress-slider');
+    const currentTimeLabel = document.getElementById('current-time');
+    const totalTimeLabel = document.getElementById('total-time');
+    const bypassToggle = document.getElementById('bypass-toggle');
+    const rawLabel = document.querySelector('.raw-label');
+    const masteredLabel = document.querySelector('.mastered-label');
+    const masteringRackCard = document.getElementById('mastering-rack-card');
+    const genreSelect = document.getElementById('genre-select');
+    const ledEq = document.getElementById('led-eq');
+    const ledSat = document.getElementById('led-sat');
+    const ledComp = document.getElementById('led-comp');
+    const ledWide = document.getElementById('led-wide');
+    
+    const sliderEqBass = document.getElementById('slider-eq-bass');
+    const sliderEqMid = document.getElementById('slider-eq-mid');
+    const sliderEqTreble = document.getElementById('slider-eq-treble');
+    const sliderSatDrive = document.getElementById('slider-sat-drive');
+    const sliderSatMix = document.getElementById('slider-sat-mix');
+    const sliderCompThreshold = document.getElementById('slider-comp-threshold');
+    const sliderCompRatio = document.getElementById('slider-comp-ratio');
+    const sliderCompAmount = document.getElementById('slider-comp-amount');
+    const sliderWideWidth = document.getElementById('slider-wide-width');
+    const sliderWideDelay = document.getElementById('slider-wide-delay');
+    const sliderLimiterGain = document.getElementById('slider-limiter-gain');
+    const grMeterFill = document.getElementById('gr-meter-fill');
+    const grMeterVal = document.getElementById('gr-meter-val');
+    const exportCard = document.getElementById('export-card');
+    const btnExportWav = document.getElementById('btn-export-wav');
+    const exportProgressContainer = document.getElementById('export-progress-container');
+    const exportProgressFill = document.getElementById('export-progress-fill');
+    const exportStatusText = document.getElementById('export-status-text');
+    const exportPercentage = document.getElementById('export-percentage');
+    const waveformCompareContainer = document.getElementById('waveform-compare-container');
+    const waveformCanvas = document.getElementById('waveform-canvas');
+    const batchGenreSelect = document.getElementById('batch-genre-select');
+    const dittoPrimaryGenre = document.getElementById('ditto-primary-genre');
+    const dittoSecondaryGenre = document.getElementById('ditto-secondary-genre');
+    
+    const albumRecommendCard = document.getElementById('album-recommend-card');
+    const albumTrackCount = document.getElementById('album-track-count');
+    const albumPrimaryGenre = document.getElementById('album-primary-genre');
+    const albumSecondaryGenre = document.getElementById('album-secondary-genre');
+    const albumArtTheme = document.getElementById('album-art-theme');
+    const albumArtPrompt = document.getElementById('album-art-prompt');
+    const btnCopyPrompt = document.getElementById('btn-copy-prompt');
+    const btnDockUpload = document.getElementById('btn-dock-upload');
+    
+    if (btnDockUpload) {
+        btnDockUpload.addEventListener('click', () => {
+            if (!isBatchExporting) fileInput.click();
+        });
+    }
+    dropZone.addEventListener('click', () => {
+        if (!isBatchExporting) fileInput.click();
+    });
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!isBatchExporting) dropZone.classList.add('hover');
+    });
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('hover');
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('hover');
+        if (!isBatchExporting && e.dataTransfer.files.length > 0) {
+            handleUploadedFiles(e.dataTransfer.files);
+        }
+    });
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleUploadedFiles(e.target.files);
+            fileInput.value = "";
+        }
+    });
+    
+    async function handleUploadedFiles(fileList) {
+        if (fileList.length === 0) return;
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        trackQueueCard.classList.remove('hidden');
+        if (activeTrackId === null) {
+            analysisPanel.classList.remove('hidden');
+            analyzerLoading.classList.remove('hidden');
+            analyzerResults.classList.add('hidden');
+        }
+        for (let i = 0; i < fileList.length; i++) {
+            const file = fileList[i];
+            const trackId = Date.now() + "_" + Math.random().toString(36).substr(2, 5);
+            const newTrack = {
+                id: trackId,
+                name: file.name,
+                file: file,
+                buffer: null,
+                analysis: null,
+                params: {
+                    eq: { bass: 0, mid: 0, treble: 0 },
+                    saturation: { drive: 0, mix: 0 },
+                    compressor: { threshold: 0, ratio: 1.0, amount: 0 },
+                    stereoWidth: { width: 100, delay: 0 },
+                    limiter: { gain: 0 }
+                },
+                status: 'waiting',
+                durationText: '0:00',
+                progress: 0
+            };
+            tracks.push(newTrack);
+            renderQueueUI();
+            analyzeTrack(newTrack);
+        }
+    }
+    
+    async function analyzeTrack(track) {
+        track.status = 'analyzing';
+        renderQueueUI();
+        try {
+            const arrayBuffer = await track.file.arrayBuffer();
+            const decodePromise = new Promise((resolve, reject) => {
+                audioCtx.decodeAudioData(arrayBuffer, resolve, reject);
+            });
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error("디코딩 초과 (20초)")), 20000);
+            });
+            track.buffer = await Promise.race([decodePromise, timeoutPromise]);
+            const min = Math.floor(track.buffer.duration / 60);
+            const sec = Math.floor(track.buffer.duration % 60).toString().padStart(2, '0');
+            track.durationText = `${min}:${sec}`;
+            const result = await AudioAnalyzer.analyze(track.buffer);
+            track.analysis = result;
+            track.params = {
+                eq: { ...result.blendedParams.eq },
+                saturation: { ...result.blendedParams.saturation },
+                compressor: { ...result.blendedParams.compressor },
+                stereoWidth: { ...result.blendedParams.stereoWidth },
+                limiter: { ...result.blendedParams.limiter }
+            };
+            track.status = 'ready';
+            if (activeTrackId === null) {
+                switchActiveTrack(track.id);
+            }
+        } catch (error) {
+            console.error(error);
+            track.status = 'waiting';
+            alert(`음원(${track.name}) 분석 실패`);
+        } finally {
+            renderQueueUI();
+            updateBatchButtonState();
+        }
+    }
+    
+    function switchActiveTrack(trackId) {
+        if (isBatchExporting) return;
+        const targetTrack = tracks.find(t => t.id === trackId);
+        if (!targetTrack || (targetTrack.status !== 'ready' && targetTrack.status !== 'done')) return;
+        stopPlayback();
+        activeTrackId = trackId;
+        engine.init(audioCtx, targetTrack.buffer);
+        currentParams.eq = { ...targetTrack.params.eq };
+        currentParams.saturation = { ...targetTrack.params.saturation };
+        currentParams.compressor = { ...targetTrack.params.compressor };
+        currentParams.stereoWidth = { ...targetTrack.params.stereoWidth };
+        currentParams.limiter.gain = targetTrack.params.limiter.gain;
+        applyBlendedParams(currentParams);
+        
+        analysisPanel.classList.remove('hidden');
+        analyzerLoading.classList.add('hidden');
+        analyzerResults.classList.remove('hidden');
+        displayFileName.textContent = targetTrack.name;
+        displayDuration.textContent = targetTrack.durationText;
+        totalTimeLabel.textContent = targetTrack.durationText;
+        progressSlider.max = targetTrack.buffer.duration;
+        progressSlider.value = 0;
+        currentTimeLabel.textContent = "0:00";
+        detectedGenre.textContent = targetTrack.analysis.compositeGenreName;
+        
+        if (dittoPrimaryGenre && dittoSecondaryGenre) {
+            const composite = targetTrack.analysis.compositeGenreName.toLowerCase();
+            let primary = 'Alternative';
+            let secondary = 'Singer-Songwriter';
+            if (composite.includes('pop') || composite.includes('팝')) {
+                primary = 'Pop'; secondary = 'K-Pop / Dance';
+            } else if (composite.includes('hip-hop') || composite.includes('힙합') || composite.includes('fire')) {
+                primary = 'Hip-Hop/Rap'; secondary = 'Instrumental / Beat';
+            } else if (composite.includes('rock') || composite.includes('록') || composite.includes('punch')) {
+                primary = 'Alternative'; secondary = 'Indie Rock / Rock';
+            } else if (composite.includes('ballad') || composite.includes('발라드') || composite.includes('clarity')) {
+                primary = 'Pop'; secondary = 'Singer-Songwriter / Folk';
+            } else if (composite.includes('lo-fi') || composite.includes('로파이') || composite.includes('tape')) {
+                primary = 'Alternative'; secondary = 'Indie Pop / Lofi';
+            } else if (composite.includes('r&b') || composite.includes('jazz') || composite.includes('재즈')) {
+                primary = 'R&B/Soul'; secondary = 'Contemporary R&B';
+            }
+            dittoPrimaryGenre.textContent = primary;
+            dittoSecondaryGenre.textContent = secondary;
+        }
+        
+        analysisReason.textContent = targetTrack.analysis.reason;
+        originalRms.textContent = `${targetTrack.analysis.rmsdB} dB`;
+        const lowVal = parseInt(targetTrack.analysis.lowRatio);
+        if (lowVal > 48) lowEnergy.textContent = "매우 강함 (Heavy)";
+        else if (lowVal > 38) lowEnergy.textContent = "보통 (Solid)";
+        else lowEnergy.textContent = "가벼움 (Light)";
+        const highVal = parseInt(targetTrack.analysis.highRatio);
+        if (highVal > 30) highHarshness.textContent = "높음 (Bright)";
+        else if (highVal > 22) highHarshness.textContent = "보통 (Natural)";
+        else highHarshness.textContent = "차분함 (Soft)";
+        
+        playerCard.classList.remove('disabled');
+        masteringRackCard.classList.remove('disabled');
+        exportCard.classList.remove('disabled');
+        btnPlayPause.disabled = false;
+        progressSlider.disabled = false;
+        bypassToggle.disabled = false;
+        bypassToggle.checked = true;
+        engine.setBypass(false);
+        genreSelect.disabled = false;
+        genreSelect.value = "auto";
+        btnExportWav.disabled = false;
+        if (batchGenreSelect) batchGenreSelect.disabled = false;
+        
+        const sliders = masteringRackCard.querySelectorAll('.rack-slider');
+        sliders.forEach(s => s.disabled = false);
+        if (targetTrack.buffer) {
+            drawStaticWaveforms(targetTrack.buffer, currentParams.limiter.gain);
+        }
+        canvasWrapper.classList.add('active');
+        drawVisualizer();
+        renderQueueUI();
+    }
+    
+    function renderQueueUI() {
+        queueList.innerHTML = "";
+        const queueTitleText = document.getElementById('queue-title-text');
+        if (queueTitleText) {
+            queueTitleText.textContent = `마스터링 대기열 (Queue) (${tracks.length}곡)`;
+        }
+        tracks.forEach(track => {
+            const item = document.createElement('div');
+            item.className = `queue-item ${track.id === activeTrackId ? 'active' : ''} ${track.status === 'done' ? 'export-success-glow' : ''}`;
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.btn-queue-delete')) return;
+                switchActiveTrack(track.id);
+            });
+            let statusText = "대기 중";
+            if (track.status === 'analyzing') statusText = "AI 분석 중";
+            else if (track.status === 'ready') statusText = "준비 완료";
+            else if (track.status === 'exporting') statusText = "WAV 추출 중";
+            else if (track.status === 'done') statusText = "마스터링 완료";
+            const genreName = track.analysis ? track.analysis.compositeGenreName : "분석 대기";
+            item.innerHTML = `
+                <div class="queue-item-meta">
+                    <span class="queue-item-title" title="${track.name}">${track.name}</span>
+                    <div class="queue-item-info-row">
+                        <span class="queue-item-genre" style="font-size: 0.68rem;"><i class="fa-solid fa-compact-disc"></i> ${genreName}</span>
+                        <span class="queue-item-duration"><i class="fa-regular fa-clock"></i> ${track.durationText}</span>
+                    </div>
+                </div>
+                <div class="queue-item-status-area">
+                    <span class="status-badge ${track.status}">${statusText}</span>
+                    <div class="queue-item-actions">
+                        <button class="btn-queue-delete" title="목록에서 제거">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="queue-item-progress-bar" style="width: ${track.progress}%"></div>
+            `;
+            const btnDelete = item.querySelector('.btn-queue-delete');
+            btnDelete.addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeTrack(track.id);
+            });
+            queueList.appendChild(item);
+        });
+        updateAlbumGenreRecommendation();
+    }
+    
+    function removeTrack(trackId) {
+        if (isBatchExporting) return;
+        const index = tracks.findIndex(t => t.id === trackId);
+        if (index === -1) return;
+        if (trackId === activeTrackId) {
+            stopPlayback();
+            activeTrackId = null;
+            analysisPanel.classList.add('hidden');
+            if (waveformCompareContainer) waveformCompareContainer.classList.add('hidden');
+            playerCard.classList.add('disabled');
+            masteringRackCard.classList.add('disabled');
+            exportCard.classList.add('disabled');
+            btnPlayPause.disabled = true;
+            progressSlider.disabled = true;
+            bypassToggle.disabled = true;
+            genreSelect.disabled = true;
+            btnExportWav.disabled = true;
+            if (batchGenreSelect) batchGenreSelect.disabled = true;
+            const sliders = masteringRackCard.querySelectorAll('.rack-slider');
+            sliders.forEach(s => s.disabled = true);
+            canvasWrapper.classList.remove('active');
+        }
+        tracks.splice(index, 1);
+        if (tracks.length === 0) {
+            trackQueueCard.classList.add('hidden');
+            if (batchGenreSelect) batchGenreSelect.disabled = true;
+            if (waveformCompareContainer) waveformCompareContainer.classList.add('hidden');
+        } else {
+            renderQueueUI();
+            updateBatchButtonState();
+            if (activeTrackId === null && tracks.length > 0) {
+                const nextReady = tracks.find(t => t.status === 'ready');
+                if (nextReady) switchActiveTrack(nextReady.id);
+            }
+        }
+    }
+    
+    function updateBatchButtonState() {
+        const readyTracks = tracks.filter(t => t.status === 'ready' || t.status === 'done');
+        btnBatchExport.disabled = (readyTracks.length === 0 || isBatchExporting);
+    }
+    
+    function updateBypassToCustom() {
+        if (genreSelect.value === 'auto' || genreSelect.value === 'bypass') {
+            genreSelect.value = 'custom';
+        }
+        saveCurrentParamsToActiveTrack();
+    }
+    
+    sliderEqBass.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        document.getElementById('val-eq-bass').textContent = `${val > 0 ? '+' : ''}${val.toFixed(1)} dB`;
+        currentParams.eq.bass = val;
+        engine.updateParameters('eq', { bass: val });
+        updateLedStatus(ledEq, val !== 0 || currentParams.eq.mid !== 0 || currentParams.eq.treble !== 0);
+        updateBypassToCustom();
+    });
+    sliderEqMid.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        document.getElementById('val-eq-mid').textContent = `${val > 0 ? '+' : ''}${val.toFixed(1)} dB`;
+        currentParams.eq.mid = val;
+        engine.updateParameters('eq', { mid: val });
+        updateLedStatus(ledEq, currentParams.eq.bass !== 0 || val !== 0 || currentParams.eq.treble !== 0);
+        updateBypassToCustom();
+    });
+    sliderEqTreble.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        document.getElementById('val-eq-treble').textContent = `${val > 0 ? '+' : ''}${val.toFixed(1)} dB`;
+        currentParams.eq.treble = val;
+        engine.updateParameters('eq', { treble: val });
+        updateLedStatus(ledEq, currentParams.eq.bass !== 0 || currentParams.eq.mid !== 0 || val !== 0);
+        updateBypassToCustom();
+    });
+    sliderSatDrive.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        document.getElementById('val-sat-drive').textContent = `${val} %`;
+        currentParams.saturation.drive = val;
+        engine.updateParameters('saturation', { drive: val });
+        updateLedStatus(ledSat, val > 0 && currentParams.saturation.mix > 0);
+        updateBypassToCustom();
+    });
+    sliderSatMix.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        document.getElementById('val-sat-mix').textContent = `${val} %`;
+        currentParams.saturation.mix = val;
+        engine.updateParameters('saturation', { mix: val });
+        updateLedStatus(ledSat, currentParams.saturation.drive > 0 && val > 0);
+        updateBypassToCustom();
+    });
+    sliderCompThreshold.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        document.getElementById('val-comp-threshold').textContent = `${val} dB`;
+        currentParams.compressor.threshold = val;
+        engine.updateParameters('compressor', { threshold: val });
+        updateLedStatus(ledComp, currentParams.compressor.amount > 0);
+        updateBypassToCustom();
+    });
+    sliderCompRatio.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        document.getElementById('val-comp-ratio').textContent = `${val.toFixed(1)}:1`;
+        currentParams.compressor.ratio = val;
+        engine.updateParameters('compressor', { ratio: val });
+        updateBypassToCustom();
+    });
+    sliderCompAmount.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        document.getElementById('val-comp-amount').textContent = `${val} %`;
+        currentParams.compressor.amount = val;
+        engine.updateParameters('compressor', { amount: val });
+        updateLedStatus(ledComp, val > 0);
+        updateBypassToCustom();
+    });
+    sliderWideWidth.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        document.getElementById('val-wide-width').textContent = `${val} %`;
+        currentParams.stereoWidth.width = val;
+        engine.updateParameters('width', { width: val });
+        updateLedStatus(ledWide, val !== 100);
+        updateBypassToCustom();
+    });
+    sliderWideDelay.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        document.getElementById('val-wide-delay').textContent = `${val} ms`;
+        currentParams.stereoWidth.delay = val;
+        engine.updateParameters('width', { delay: val });
+        updateBypassToCustom();
+    });
+    sliderLimiterGain.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        document.getElementById('val-limiter-gain').textContent = `+${val.toFixed(1)} dB`;
+        currentParams.limiter.gain = val;
+        engine.updateParameters('limiter', { gain: val });
+        updateBypassToCustom();
+    });
+    
+    const DEFAULT_SLIDER_VALUES = {
+        'slider-eq-bass': 0.0, 'slider-eq-mid': 0.0, 'slider-eq-treble': 0.0,
+        'slider-sat-drive': 20, 'slider-sat-mix': 10,
+        'slider-comp-threshold': -16, 'slider-comp-ratio': 1.5, 'slider-comp-amount': 25,
+        'slider-wide-width': 120, 'slider-wide-delay': 8, 'slider-limiter-gain': 2.5
+    };
+    Object.keys(DEFAULT_SLIDER_VALUES).forEach(id => {
+        const slider = document.getElementById(id);
+        if (slider) {
+            slider.addEventListener('dblclick', () => {
+                if (slider.disabled) return;
+                slider.value = DEFAULT_SLIDER_VALUES[id];
+                slider.dispatchEvent(new Event('input'));
+            });
+        }
+    });
+    
+    function updateLedStatus(ledNode, isActive) {
+        if (!ledNode) return;
+        if (isActive) ledNode.classList.add('active');
+        else ledNode.classList.remove('active');
+    }
+    
+    function saveCurrentParamsToActiveTrack() {
+        if (activeTrackId === null) return;
+        const activeTrack = tracks.find(t => t.id === activeTrackId);
+        if (activeTrack) {
+            activeTrack.params = {
+                eq: { ...currentParams.eq },
+                saturation: { ...currentParams.saturation },
+                compressor: { ...currentParams.compressor },
+                stereoWidth: { ...currentParams.stereoWidth },
+                limiter: { gain: currentParams.limiter.gain }
+            };
+        }
+    }
+    
+    genreSelect.addEventListener('change', (e) => {
+        const style = e.target.value;
+        if (style === "bypass") {
+            resetRackToZero();
+        } else if (style === "auto") {
+            const activeTrack = tracks.find(t => t.id === activeTrackId);
+            if (activeTrack && activeTrack.analysis) {
+                applyBlendedParams(activeTrack.analysis.blendedParams);
+            }
+        } else if (style === "custom") {
+        } else {
+            applyGenrePreset(style);
+        }
+        saveCurrentParamsToActiveTrack();
+    });
+    
+    function applyGenrePreset(genreKey) {
+        const preset = MASTERING_PRESETS[genreKey];
+        if (!preset) return;
+        currentParams.eq = { ...preset.eq };
+        currentParams.saturation = { ...preset.saturation };
+        currentParams.compressor = { ...preset.compressor };
+        currentParams.stereoWidth = { ...preset.stereoWidth };
+        currentParams.limiter.gain = preset.limiter.gain;
+        applyBlendedParams(currentParams);
+    }
+    
+    function applyBlendedParams(blended) {
+        if (!blended) return;
+        currentParams.eq = { ...blended.eq };
+        currentParams.saturation = { ...blended.saturation };
+        currentParams.compressor = { ...blended.compressor };
+        currentParams.stereoWidth = { ...blended.stereoWidth };
+        currentParams.limiter.gain = blended.limiter.gain;
+        
+        sliderEqBass.value = blended.eq.bass;
+        document.getElementById('val-eq-bass').textContent = `${blended.eq.bass > 0 ? '+' : ''}${blended.eq.bass.toFixed(1)} dB`;
+        sliderEqMid.value = blended.eq.mid;
+        document.getElementById('val-eq-mid').textContent = `${blended.eq.mid > 0 ? '+' : ''}${blended.eq.mid.toFixed(1)} dB`;
+        sliderEqTreble.value = blended.eq.treble;
+        document.getElementById('val-eq-treble').textContent = `${blended.eq.treble > 0 ? '+' : ''}${blended.eq.treble.toFixed(1)} dB`;
+        sliderSatDrive.value = blended.saturation.drive;
+        document.getElementById('val-sat-drive').textContent = `${blended.saturation.drive.toFixed(0)} %`;
+        sliderSatMix.value = blended.saturation.mix;
+        document.getElementById('val-sat-mix').textContent = `${blended.saturation.mix.toFixed(0)} %`;
+        sliderCompThreshold.value = blended.compressor.threshold;
+        document.getElementById('val-comp-threshold').textContent = `${blended.compressor.threshold.toFixed(0)} dB`;
+        sliderCompRatio.value = blended.compressor.ratio;
+        document.getElementById('val-comp-ratio').textContent = `${blended.compressor.ratio.toFixed(1)}:1`;
+        sliderCompAmount.value = blended.compressor.amount;
+        document.getElementById('val-comp-amount').textContent = `${blended.compressor.amount.toFixed(0)} %`;
+        sliderWideWidth.value = blended.stereoWidth.width;
+        document.getElementById('val-wide-width').textContent = `${blended.stereoWidth.width.toFixed(0)} %`;
+        sliderWideDelay.value = blended.stereoWidth.delay;
+        document.getElementById('val-wide-delay').textContent = `${blended.stereoWidth.delay.toFixed(0)} ms`;
+        sliderLimiterGain.value = blended.limiter.gain;
+        document.getElementById('val-limiter-gain').textContent = `+${blended.limiter.gain.toFixed(1)} dB`;
+        
+        updateLedStatus(ledEq, blended.eq.bass !== 0 || blended.eq.mid !== 0 || blended.eq.treble !== 0);
+        updateLedStatus(ledSat, blended.saturation.drive > 0 && blended.saturation.mix > 0);
+        updateLedStatus(ledComp, blended.compressor.amount > 0);
+        updateLedStatus(ledWide, blended.stereoWidth.width !== 100);
+        
+        engine.updateParameters('eq', currentParams.eq);
+        engine.updateParameters('saturation', currentParams.saturation);
+        engine.updateParameters('compressor', currentParams.compressor);
+        engine.updateParameters('width', currentParams.stereoWidth);
+        engine.updateParameters('limiter', currentParams.limiter);
+    }
+    
+    function resetRackToZero() {
+        sliderEqBass.value = 0; document.getElementById('val-eq-bass').textContent = '0.0 dB';
+        sliderEqMid.value = 0; document.getElementById('val-eq-mid').textContent = '0.0 dB';
+        sliderEqTreble.value = 0; document.getElementById('val-eq-treble').textContent = '0.0 dB';
+        sliderSatDrive.value = 0; document.getElementById('val-sat-drive').textContent = '0 %';
+        sliderSatMix.value = 0; document.getElementById('val-sat-mix').textContent = '0 %';
+        sliderCompThreshold.value = 0; document.getElementById('val-comp-threshold').textContent = '0 dB';
+        sliderCompRatio.value = 1.0; document.getElementById('val-comp-ratio').textContent = '1.0:1';
+        sliderCompAmount.value = 0; document.getElementById('val-comp-amount').textContent = '0 %';
+        sliderWideWidth.value = 100; document.getElementById('val-wide-width').textContent = '100 %';
+        sliderWideDelay.value = 0; document.getElementById('val-wide-delay').textContent = '0 ms';
+        sliderLimiterGain.value = 0; document.getElementById('val-limiter-gain').textContent = '+0.0 dB';
+        updateLedStatus(ledEq, false); updateLedStatus(ledSat, false); updateLedStatus(ledComp, false); updateLedStatus(ledWide, false);
+        currentParams.eq = { bass: 0, mid: 0, treble: 0 };
+        currentParams.saturation = { drive: 0, mix: 0 };
+        currentParams.compressor = { threshold: 0, ratio: 1.0, amount: 0 };
+        currentParams.stereoWidth = { width: 100, delay: 0 };
+        currentParams.limiter.gain = 0;
+        engine.updateParameters('eq', currentParams.eq);
+        engine.updateParameters('saturation', currentParams.saturation);
+        engine.updateParameters('compressor', currentParams.compressor);
+        engine.updateParameters('width', currentParams.stereoWidth);
+        engine.updateParameters('limiter', currentParams.limiter);
+    }
+    
+    bypassToggle.addEventListener('change', function() {
+        if (isBatchExporting) return;
+        const masteredMode = this.checked;
+        engine.setBypass(!masteredMode);
+        if (masteredMode) {
+            rawLabel.classList.remove('active'); masteredLabel.classList.add('active');
+        } else {
+            rawLabel.classList.add('active'); masteredLabel.classList.remove('active');
+        }
+    });
+    
+    btnPlayPause.addEventListener('click', () => {
+        if (activeTrackId === null || isBatchExporting) return;
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        if (isPlaying) { pausePlayback(); } else { startPlayback(); }
+    });
+    
+    progressSlider.addEventListener('input', (e) => {
+        if (isBatchExporting) return;
+        playbackOffset = parseFloat(e.target.value);
+        updatePlaybackTimerLabel(playbackOffset);
+        if (isPlaying) {
+            engine.stop(); isPlaying = false;
+            startPlayback(playbackOffset);
+        }
+    });
+    
+    function startPlayback(offset = null) {
+        if (isPlaying) return;
+        if (offset !== null) playbackOffset = offset;
+        engine.play(playbackOffset, () => {
+            stopPlayback();
+        });
+        isPlaying = true;
+        btnPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        playStartTime = audioCtx.currentTime - playbackOffset;
+        timerInterval = setInterval(() => {
+            playbackOffset = audioCtx.currentTime - playStartTime;
+            progressSlider.value = playbackOffset;
+            updatePlaybackTimerLabel(playbackOffset);
+            if (playbackOffset >= tracks.find(t => t.id === activeTrackId).buffer.duration) {
+                stopPlayback();
+            }
+        }, 100);
+    }
+    
+    function pausePlayback() {
+        if (!isPlaying) return;
+        engine.stop();
+        clearInterval(timerInterval);
+        isPlaying = false;
+        btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+    }
+    
+    function stopPlayback() {
+        engine.stop();
+        clearInterval(timerInterval);
+        isPlaying = false;
+        playbackOffset = 0;
+        progressSlider.value = 0;
+        updatePlaybackTimerLabel(0);
+        btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+    }
+    
+    function updatePlaybackTimerLabel(sec) {
+        const curMin = Math.floor(sec / 60);
+        const curSec = Math.floor(sec % 60).toString().padStart(2, '0');
+        currentTimeLabel.textContent = `${curMin}:${curSec}`;
+    }
+    
+    const canvasCtx = visualizerCanvas.getContext('2d');
+    function resizeCanvas() {
+        const rect = visualizerCanvas.getBoundingClientRect();
+        visualizerCanvas.width = rect.width * window.devicePixelRatio;
+        visualizerCanvas.height = rect.height * window.devicePixelRatio;
+        canvasCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    function drawVisualizer() {
+        animationFrameId = requestAnimationFrame(drawVisualizer);
+        const width = visualizerCanvas.width / window.devicePixelRatio;
+        const height = visualizerCanvas.height / window.devicePixelRatio;
+        canvasCtx.fillStyle = 'rgba(10, 12, 16, 0.2)';
+        canvasCtx.fillRect(0, 0, width, height);
+        if (!engine.analyser || activeTrackId === null) return;
+        const bufferLength = engine.analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        if (isPlaying) {
+            engine.analyser.getByteFrequencyData(dataArray);
+            const gr = engine.getGainReduction();
+            updateGrMeter(gr);
+        } else {
+            dataArray.fill(0);
+            updateGrMeter(0);
+        }
+        const barWidth = (width / bufferLength) * 1.5;
+        let barHeight;
+        let x = 0;
+        const gradient = canvasCtx.createLinearGradient(0, height, 0, 0);
+        gradient.addColorStop(0, '#4facfe');
+        gradient.addColorStop(0.5, '#00f2fe');
+        gradient.addColorStop(1, '#39ff14');
+        canvasCtx.beginPath();
+        for (let i = 0; i < bufferLength; i++) {
+            const value = dataArray[i];
+            barHeight = (value / 255) * height * 0.85;
+            if (i === 0) {
+                canvasCtx.moveTo(x, height - barHeight);
+            } else {
+                canvasCtx.lineTo(x, height - barHeight);
+            }
+            x += barWidth;
+        }
+        canvasCtx.strokeStyle = gradient;
+        canvasCtx.lineWidth = 2.5;
+        canvasCtx.shadowBlur = 8;
+        canvasCtx.shadowColor = 'rgba(0, 242, 254, 0.5)';
+        canvasCtx.stroke();
+        canvasCtx.shadowBlur = 0;
+        canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        canvasCtx.lineWidth = 1;
+        canvasCtx.beginPath();
+        canvasCtx.moveTo(0, height - 1);
+        canvasCtx.lineTo(width, height - 1);
+        canvasCtx.stroke();
+    }
+    
+    function updateGrMeter(grdB) {
+        const maxGr = 8.0;
+        const percent = Math.min(100, (grdB / maxGr) * 100);
+        grMeterFill.style.width = `${percent}%`;
+        if (grdB > 0.05) {
+            grMeterVal.textContent = `-${grdB.toFixed(1)} dB`;
+        } else {
+            grMeterVal.textContent = `0.0 dB`;
+        }
+    }
+    
+    btnExportWav.addEventListener('click', async () => {
+        const activeTrack = tracks.find(t => t.id === activeTrackId);
+        if (!activeTrack || isBatchExporting) return;
+        pausePlayback();
+        exportProgressContainer.classList.remove('hidden');
+        btnExportWav.disabled = true;
+        btnBatchExport.disabled = true;
+        progressSlider.disabled = true;
+        btnPlayPause.disabled = true;
+        exportStatusText.textContent = "오디오 이펙트 연산 처리 중...";
+        exportPercentage.textContent = "0%";
+        exportProgressFill.style.width = "0%";
+        try {
+            const masteredBuffer = await engine.renderOffline(
+                activeTrack.buffer,
+                activeTrack.params,
+                (progress) => {
+                    exportProgressFill.style.width = `${progress}%`;
+                    exportPercentage.textContent = `${progress}%`;
+                }
+            );
+            const wavBlob = WavEncoder.encode(masteredBuffer);
+            triggerDownload(wavBlob, activeTrack.name);
+            exportStatusText.textContent = "마스터링 완료! 다운로드가 완료되었습니다.";
+            exportPercentage.textContent = "100%";
+            exportProgressFill.style.width = "100%";
+        } catch (error) {
+            console.error(error);
+            alert("저장하는 도중 오류가 발생했습니다.");
+            exportProgressContainer.classList.add('hidden');
+        } finally {
+            btnExportWav.disabled = false;
+            updateBatchButtonState();
+            progressSlider.disabled = false;
+            btnPlayPause.disabled = false;
+        }
+    });
+    
+    function playSuccessChime() {
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.07);
+            osc.frequency.setValueAtTime(783.99, now + 0.14);
+            osc.frequency.setValueAtTime(1046.50, now + 0.21);
+            gainNode.gain.setValueAtTime(0.0, now);
+            gainNode.gain.linearRampToValueAtTime(0.12, now + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+            osc.start(now);
+            osc.stop(now + 0.6);
+        } catch (err) {
+            console.warn(err);
+        }
+    }
+    
+    function triggerDownload(blob, originalName) {
+        playSuccessChime();
+        saveToLibraryStorage(originalName);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        const lastDotIndex = originalName.lastIndexOf('.');
+        const baseName = lastDotIndex !== -1 ? originalName.substring(0, lastDotIndex) : originalName;
+        a.download = `${baseName}_mastered.wav`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 1000);
+    }
+    
+    btnBatchExport.addEventListener('click', async () => {
+        const readyTracks = tracks.filter(t => t.status === 'ready' || t.status === 'done');
+        if (readyTracks.length === 0 || isBatchExporting) return;
+        pausePlayback();
+        isBatchExporting = true;
+        btnBatchExport.disabled = true;
+        btnExportWav.disabled = true;
+        dropZone.style.pointerEvents = "none";
+        dropZone.style.opacity = "0.5";
+        
+        let dirHandle = null;
+        if (window.showDirectoryPicker) {
+            try {
+                dirHandle = await window.showDirectoryPicker();
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    isBatchExporting = false;
+                    btnBatchExport.disabled = false;
+                    btnExportWav.disabled = (activeTrackId === null);
+                    dropZone.style.pointerEvents = "auto";
+                    dropZone.style.opacity = "1";
+                    updateBatchButtonState();
+                    console.log('사용자가 일괄 다운로드 폴더 지정을 취소했습니다.');
+                    return;
+                }
+                console.warn('showDirectoryPicker 실패, 개별 창 저장으로 진행합니다:', err);
+            }
+        }
+        
+        readyTracks.forEach(t => {
+            t.progress = 0; t.status = 'waiting';
+        });
+        renderQueueUI();
+        for (let i = 0; i < readyTracks.length; i++) {
+            const track = readyTracks[i];
+            track.status = 'exporting';
+            renderQueueUI();
+            try {
+                const masteredBuffer = await engine.renderOffline(
+                    track.buffer,
+                    track.params,
+                    (progress) => {
+                        track.progress = progress;
+                        renderQueueUI();
+                    }
+                );
+                const wavBlob = WavEncoder.encode(masteredBuffer);
+                
+                const lastDotIndex = track.name.lastIndexOf('.');
+                const baseName = lastDotIndex !== -1 ? track.name.substring(0, lastDotIndex) : track.name;
+                const fileName = `${baseName}_mastered.wav`;
+                
+                if (dirHandle) {
+                    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(wavBlob);
+                    await writable.close();
+                    playSuccessChime();
+                    saveToLibraryStorage(track.name);
+                } else {
+                    await triggerDownload(wavBlob, track.name);
+                }
+                
+                track.status = 'done';
+                track.progress = 100;
+            } catch (error) {
+                console.error(error);
+                track.status = 'waiting';
+                track.progress = 0;
+            } finally {
+                renderQueueUI();
+            }
+        }
+        isBatchExporting = false;
+        dropZone.style.pointerEvents = "auto";
+        dropZone.style.opacity = "1";
+        updateBatchButtonState();
+        btnExportWav.disabled = (activeTrackId === null);
+        alert("모든 곡의 일괄 마스터링 및 폴더 저장이 성공적으로 완료되었습니다! 🚀🎶");
+    });
+    
+    if (batchGenreSelect) {
+        batchGenreSelect.addEventListener('change', (e) => {
+            const genreKey = e.target.value;
+            const preset = MASTERING_PRESETS[genreKey];
+            if (!preset) return;
+            const readyTracks = tracks.filter(t => t.status === 'ready' || t.status === 'done');
+            if (readyTracks.length === 0) return;
+            readyTracks.forEach(track => {
+                track.params = {
+                    eq: { ...preset.eq },
+                    saturation: { ...preset.saturation },
+                    compressor: { ...preset.compressor },
+                    stereoWidth: { ...preset.stereoWidth },
+                    limiter: { gain: preset.limiter.gain }
+                };
+                track.analysis.compositeGenreName = `일괄 적용 (${preset.name.split('(')[0].trim()})`;
+            });
+            const activeTrack = tracks.find(t => t.id === activeTrackId);
+            if (activeTrack && activeTrack.status === 'ready') {
+                currentParams.eq = { ...preset.eq };
+                currentParams.saturation = { ...preset.saturation };
+                currentParams.compressor = { ...preset.compressor };
+                currentParams.stereoWidth = { ...preset.stereoWidth };
+                currentParams.limiter.gain = preset.limiter.gain;
+                applyBlendedParams(currentParams);
+                drawStaticWaveforms(activeTrack.buffer, currentParams.limiter.gain);
+            }
+            renderQueueUI();
+            batchGenreSelect.value = "";
+        });
+    }
+    
+    function drawStaticWaveforms(buffer, limiterGainDb) {
+        if (!waveformCanvas || !waveformCompareContainer) return;
+        waveformCompareContainer.classList.remove('hidden');
+        const ctx = waveformCanvas.getContext('2d');
+        if (!ctx) return;
+        const rect = waveformCanvas.getBoundingClientRect();
+        waveformCanvas.width = rect.width * window.devicePixelRatio;
+        waveformCanvas.height = rect.height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        const w = rect.width;
+        const h = rect.height;
+        ctx.clearRect(0, 0, w, h);
+        const data = buffer.getChannelData(0);
+        const step = Math.floor(data.length / w) || 1;
+        const halfH = h / 2;
+        const gainFactor = Math.pow(10, limiterGainDb / 20);
+        
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < w; i++) {
+            let max = 0;
+            const start = i * step;
+            for (let j = 0; j < step; j++) {
+                if (start + j >= data.length) break;
+                const val = Math.abs(data[start + j]);
+                if (val > max) max = val;
+            }
+            const ampHeight = max * (halfH * 0.8);
+            ctx.moveTo(i, halfH - ampHeight);
+            ctx.lineTo(i, halfH);
+        }
+        ctx.stroke();
+        
+        ctx.strokeStyle = '#00f0ff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < w; i++) {
+            let max = 0;
+            const start = i * step;
+            for (let j = 0; j < step; j++) {
+                if (start + j >= data.length) break;
+                const val = Math.abs(data[start + j]);
+                if (val > max) max = val;
+            }
+            let masteredAmp = max * gainFactor;
+            if (masteredAmp > 0.89) masteredAmp = 0.89;
+            const ampHeight = masteredAmp * (halfH * 0.8);
+            ctx.moveTo(i, halfH);
+            ctx.lineTo(i, halfH + ampHeight);
+        }
+        ctx.stroke();
+        
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, halfH);
+        ctx.lineTo(w, halfH);
+        ctx.stroke();
+    }
+    
+    window.addEventListener('resize', () => {
+        if (activeTrackId !== null) {
+            const activeTrack = tracks.find(t => t.id === activeTrackId);
+            if (activeTrack && activeTrack.buffer) {
+                drawStaticWaveforms(activeTrack.buffer, currentParams.limiter.gain);
+            }
+        }
+    });
+    
+    const modalGuide = document.getElementById('modal-guide');
+    const modalLibrary = document.getElementById('modal-library');
+    const navGuideLink = document.getElementById('nav-guide-link');
+    const navLibraryLink = document.getElementById('nav-library-link');
+    const dockRackLink = document.getElementById('dock-rack-link');
+    const btnCloseGuide = document.getElementById('btn-close-guide');
+    const btnCloseGuideOk = document.getElementById('btn-close-guide-ok');
+    const btnCloseLibrary = document.getElementById('btn-close-library');
+    const btnCloseLibraryOk = document.getElementById('btn-close-library-ok');
+    const btnClearLibrary = document.getElementById('btn-clear-library');
+    const libraryHistoryList = document.getElementById('library-history-list');
+    
+    if (navGuideLink && modalGuide) {
+        navGuideLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalGuide.classList.add('modal-active');
+        });
+        [btnCloseGuide, btnCloseGuideOk].forEach(btn => {
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    modalGuide.classList.remove('modal-active');
+                });
+            }
+        });
+    }
+    
+    if (dockRackLink && masteringRackCard) {
+        dockRackLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            masteringRackCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            masteringRackCard.classList.remove('glow-focus-effect');
+            void masteringRackCard.offsetWidth;
+            masteringRackCard.classList.add('glow-focus-effect');
+            setTimeout(() => {
+                masteringRackCard.classList.remove('glow-focus-effect');
+            }, 1800);
+        });
+    }
+    
+    const STORAGE_KEY = 'synthmaster_library_v5';
+    function saveToLibraryStorage(filename) {
+        const track = tracks.find(t => t.name === filename);
+        if (!track) return;
+        try {
+            const currentHistory = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            const newItem = {
+                id: Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+                name: track.name,
+                genre: track.analysis ? track.analysis.compositeGenreName : 'Custom',
+                params: {
+                    eq: { ...track.params.eq },
+                    saturation: { ...track.params.saturation },
+                    compressor: { ...track.params.compressor },
+                    stereoWidth: { ...track.params.stereoWidth },
+                    limiter: { gain: track.params.limiter.gain }
+                },
+                date: new Date().toLocaleDateString()
+            };
+            const filtered = currentHistory.filter(item => item.name !== track.name);
+            filtered.unshift(newItem);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered.slice(0, 30)));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    
+    if (navLibraryLink && modalLibrary) {
+        navLibraryLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalLibrary.classList.add('modal-active');
+            renderLibraryList();
+        });
+        [btnCloseLibrary, btnCloseLibraryOk].forEach(btn => {
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    modalLibrary.classList.remove('modal-active');
+                });
+            }
+        });
+        if (btnClearLibrary) {
+            btnClearLibrary.addEventListener('click', () => {
+                if (confirm("모든 마스터링 작업 이력과 저장된 슬라이더 세팅값(Recall)이 영구 삭제됩니다. 진행하시겠습니까?")) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    renderLibraryList();
+                }
+            });
+        }
+    }
+    
+    function renderLibraryList() {
+        if (!libraryHistoryList) return;
+        try {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            if (history.length === 0) {
+                libraryHistoryList.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="p-6 text-center text-outline">저장 완료된 마스터링 히스토리가 없습니다.</td>
+                    </tr>
+                `;
+                return;
+            }
+            libraryHistoryList.innerHTML = "";
+            history.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-white/5 hover:bg-white/5 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <div class="font-bold text-on-surface truncate max-w-[200px]" title="${item.name}">${item.name}</div>
+                        <div class="text-[9px] text-outline mt-0.5">${item.date}</div>
+                    </td>
+                    <td class="p-3 text-center">
+                        <span class="px-2 py-0.5 bg-primary-container/10 text-primary-container text-[9px] rounded-full border border-primary-container/20">${item.genre.split('(')[0].trim()}</span>
+                    </td>
+                    <td class="p-3 text-right">
+                        <button class="btn-recall-action px-2.5 py-1 bg-gradient-to-r from-secondary-container to-[#b600f8] text-white font-bold rounded text-[9px] hover:brightness-110 transition active:scale-95" data-id="${item.id}">
+                            Recall (세팅 복원)
+                        </button>
+                    </td>
+                `;
+                const btnRecall = tr.querySelector('.btn-recall-action');
+                btnRecall.addEventListener('click', () => {
+                    recallLibrarySettings(item.id);
+                });
+                libraryHistoryList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+    
+    function recallLibrarySettings(itemId) {
+        try {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            const target = history.find(item => item.id === itemId);
+            if (!target) return;
+            currentParams.eq = { ...target.params.eq };
+            currentParams.saturation = { ...target.params.saturation };
+            currentParams.compressor = { ...target.params.compressor };
+            currentParams.stereoWidth = { ...target.params.stereoWidth };
+            currentParams.limiter.gain = target.params.limiter.gain;
+            applyBlendedParams(currentParams);
+            genreSelect.value = "custom";
+            const activeTrack = tracks.find(t => t.id === activeTrackId);
+            if (activeTrack && activeTrack.buffer) {
+                drawStaticWaveforms(activeTrack.buffer, currentParams.limiter.gain);
+                saveCurrentParamsToActiveTrack();
+            }
+            modalLibrary.classList.remove('modal-active');
+            playSuccessChime();
+            masteringRackCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            masteringRackCard.classList.remove('glow-focus-effect');
+            void masteringRackCard.offsetWidth;
+            masteringRackCard.classList.add('glow-focus-effect');
+            setTimeout(() => {
+                masteringRackCard.classList.remove('glow-focus-effect');
+            }, 1800);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    
+    let deferredPrompt;
+    const btnPwaInstall = document.getElementById('btn-pwa-install');
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (btnPwaInstall) {
+            btnPwaInstall.classList.remove('hidden');
+        }
+    });
+    if (btnPwaInstall) {
+        btnPwaInstall.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                alert("설치를 진행할 수 없습니다.");
+                return;
+            }
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            btnPwaInstall.classList.add('hidden');
+        });
+    }
+    window.addEventListener('appinstalled', (e) => {
+        if (btnPwaInstall) {
+            btnPwaInstall.classList.add('hidden');
+        }
+        playSuccessChime();
+        alert("바탕화면에 앱이 추가되었습니다.");
+    });
+    
+    function updateAlbumGenreRecommendation() {
+        if (!albumRecommendCard || !albumTrackCount || !albumPrimaryGenre || !albumSecondaryGenre) return;
+        const analyzedTracks = tracks.filter(t => t.analysis);
+        const count = analyzedTracks.length;
+        if (count < 2) {
+            albumRecommendCard.classList.add('hidden');
+            return;
+        }
+        albumRecommendCard.classList.remove('hidden');
+        albumTrackCount.textContent = count;
+        const scores = { pop: 0, hiphop: 0, rock: 0, ballad: 0, lofi: 0 };
+        analyzedTracks.forEach(track => {
+            const composite = track.analysis.compositeGenreName.toLowerCase();
+            let matched = false;
+            if (composite.includes('pop') || composite.includes('팝')) { scores.pop += 1; matched = true; }
+            if (composite.includes('hip-hop') || composite.includes('힙합') || composite.includes('fire')) { scores.hiphop += 1; matched = true; }
+            if (composite.includes('rock') || composite.includes('록') || composite.includes('punch')) { scores.rock += 1; matched = true; }
+            if (composite.includes('ballad') || composite.includes('발라드') || composite.includes('clarity')) { scores.ballad += 1; matched = true; }
+            if (composite.includes('lo-fi') || composite.includes('로파이') || composite.includes('tape')) { scores.lofi += 1; matched = true; }
+            if (!matched) {
+                scores.pop += 0.5;
+                scores.lofi += 0.5;
+            }
+        });
+        let bestGenre = 'pop';
+        let maxScore = -1;
+        Object.keys(scores).forEach(key => {
+            if (scores[key] > maxScore) {
+                maxScore = scores[key];
+                bestGenre = key;
+            }
+        });
+        
+        let primary = 'Alternative';
+        let secondary = 'Singer-Songwriter / Folk';
+        let artTheme = '도시의 밤, 네온 불빛과 아날로그 빈티지 감성의 쓸쓸함';
+        let artPrompt = 'A moody cinematic photography of a rainy city street at night, neon reflections, vintage analog film grain style, highly detailed, album cover art --ar 1:1';
+        
+        if (bestGenre === 'pop') {
+            primary = 'Pop'; secondary = 'K-Pop / Dance';
+            artTheme = '생동감 넘치는 파스텔 톤의 현대적이고 기하학적인 3D 그래픽 아트';
+            artPrompt = 'A vibrant minimalist 3D render, pastel color palette, geometric shapes, retro-futuristic aesthetic, clean studio lighting, high resolution album cover --ar 1:1';
+        } else if (bestGenre === 'hiphop') {
+            primary = 'Hip-Hop/Rap'; secondary = 'Instrumental / Beat';
+            artTheme = '어두운 골목길의 힙하고 강렬한 네온 램프와 그런지한 그라피티 질감';
+            artPrompt = 'A gritty urban street at twilight, dark neon lights, glowing spray graffiti texture, cinematic lighting, dramatic shadows, hip-hop vinyl cover art --ar 1:1';
+        } else if (bestGenre === 'rock') {
+            primary = 'Alternative'; secondary = 'Indie Rock / Rock';
+            artTheme = '일렉트릭하고 강력한 대비의 그런지 질감과 아날로그 콜라주 디자인';
+            artPrompt = 'An abstract grunge collage, high contrast dark electric textures, torn paper layers, retro photocopier scan effect, punk rock aesthetic, raw and energetic --ar 1:1';
+        } else if (bestGenre === 'ballad') {
+            primary = 'Pop'; secondary = 'Singer-Songwriter / Folk';
+            artTheme = '안개 낀 고요한 호수와 따뜻한 햇살, 아련한 감성의 수채화 일러스트';
+            artPrompt = 'A peaceful scenic watercolor painting of a foggy lake at dawn, soft warm sunlight filtering through trees, melancholic nostalgic vibe, indie folk album cover --ar 1:1';
+        } else if (bestGenre === 'lofi') {
+            primary = 'Alternative'; secondary = 'Indie Pop / Lofi';
+            artTheme = '비 내리는 밤 아늑한 다락방, 레트로 사이키델릭 90년대 셀 애니메이션 감성';
+            artPrompt = 'A cozy warm vintage room interior, soft nostalgic 90s anime style, rain window on background, lofi hiphop beat cover, warm pastel aesthetic --ar 1:1';
+        }
+        
+        albumPrimaryGenre.textContent = primary;
+        albumSecondaryGenre.textContent = secondary;
+        if (albumArtTheme) albumArtTheme.textContent = artTheme;
+        if (albumArtPrompt) albumArtPrompt.value = artPrompt;
+    }
+    
+    if (btnCopyPrompt && albumArtPrompt) {
+        btnCopyPrompt.addEventListener('click', () => {
+            albumArtPrompt.select();
+            document.execCommand('copy');
+            const origIcon = btnCopyPrompt.innerHTML;
+            btnCopyPrompt.innerHTML = `<i class="fa-solid fa-check text-primary-fixed"></i>`;
+            setTimeout(() => {
+                btnCopyPrompt.innerHTML = origIcon;
+            }, 1200);
+            alert("프롬프트가 클립보드에 복사되었습니다!");
+        });
+    }
+});
+</script>
+</body>
+</html>

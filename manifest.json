@@ -1,0 +1,18 @@
+{
+  "short_name": "SunoMaster AI",
+  "name": "SYNTH MASTER AI - Professional Mastering Suite",
+  "description": "최고 음질 디토뮤직 규격 오프라인 일괄 AI 마스터링 스튜디오",
+  "icons": [
+    {
+      "src": "https://lh3.googleusercontent.com/aida-public/AB6AXuD_huhMKAIenq0kF5dYtfwG_-lkzCluuozz9hDB4rw4HbnauXo10RM14iqHjmIXEghLmY35BBoE78p6fqBRWtmmjh4EtSxx6P6BI161pbvVwadIWK4pzb_Bvo8mCMkXSjqjqg9uqMWT8D8Det8_wA-KpB0c1z5DL7cHOrdXO6ql_-2t--AkRlFoXJtw6Bnh9f1Rd9qy1QvqGwOdmsFOaJeDQuokRFrdC1yn2JmbxTqaYNv44Rs6EIxz91UJOEIpNXcDIt8HKdjbSDY",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#050506",
+  "theme_color": "#00f0ff",
+  "display": "standalone",
+  "orientation": "portrait-primary"
+}

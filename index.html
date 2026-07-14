@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+    <title>SYNTH MASTER AI | Professional Mastering Suite</title>
+    <!-- PWA 지원 링크 및 모바일 테마 설정 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00f0ff">
+    <!-- Tailwind CSS CDN 및 폰트/아이콘 로드 -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "inverse-primary": "#006970",
+                "surface-variant": "#353436",
+                "on-primary-container": "#006970",
+                "surface-bright": "#3a393a",
+                "tertiary": "#fff3f4",
+                "on-surface-variant": "#b9cacb",
+                "surface": "#131314",
+                "primary-container": "#00f0ff",
+                "tertiary-container": "#ffccd6",
+                "on-tertiary-container": "#bb0058",
+                "tertiary-fixed-dim": "#ffb1c3",
+                "on-secondary-fixed": "#320047",
+                "inverse-surface": "#e5e2e3",
+                "primary": "#dbfcff",
+                "on-primary": "#00363a",
+                "secondary": "#ebb2ff",
+                "secondary-fixed": "#f8d8ff",
+                "on-secondary-container": "#fff6fc",
+                "surface-dim": "#131314",
+                "secondary-container": "#b600f8",
+                "on-primary-fixed-variant": "#004f54",
+                "background": "#131314",
+                "surface-container-high": "#2a2a2b",
+                "secondary-fixed-dim": "#ebb2ff",
+                "surface-container-highest": "#353436",
+                "outline-variant": "#3b494b",
+                "on-tertiary-fixed": "#3f0019",
+                "on-secondary-fixed-variant": "#74009f",
+                "error": "#ffb4ab",
+                "outline": "#849495",
+                "on-surface": "#e5e2e3",
+                "surface-container-lowest": "#0e0e0f",
+                "on-tertiary": "#66002c",
+                "primary-fixed": "#7df4ff",
+                "error-container": "#93000a",
+                "surface-container": "#201f20",
+                "on-secondary": "#520072",
+                "surface-container-low": "#1c1b1c",
+                "on-tertiary-fixed-variant": "#8f0041",
+                "inverse-on-surface": "#313031",
+                "surface-tint": "#00dbe9",
+                "on-background": "#e5e2e3",
+                "on-error": "#690005",
+                "tertiary-fixed": "#ffd9e0",
+                "on-error-container": "#ffdad6",
+                "primary-fixed-dim": "#00dbe9",
+                "on-primary-fixed": "#002022"
+            },
+            "borderRadius": {
+                "DEFAULT": "4px",
+                "lg": "8px",
+                "xl": "12px",
+                "full": "9999px"
+            },
+            "spacing": {
+                "margin-edge": "32px",
+                "container-max": "1440px",
+                "gutter": "24px",
+                "unit": "4px"
+            },
+            "fontFamily": {
+                "timestamp": ["JetBrains Mono"],
+                "headline-md": ["Sora"],
+                "data-mono": ["JetBrains Mono"],
+                "body-md": ["Sora"],
+                "headline-lg-mobile": ["Sora"],
+                "headline-lg": ["Sora"],
+                "body-sm": ["Sora"]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        body {
+            background-color: #050506;
+            color: #e5e2e3;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(19, 19, 20, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-panel:hover {
+            border-color: rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.03);
+        }
+        .neon-glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+            border-color: rgba(0, 240, 255, 0.4);
+        }
+        .custom-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #0e0e0f;
+            outline: none;
+            border-radius: 3px;
+            margin: 6px 0;
+            transition: background 0.2s;
+        }
+        .custom-slider:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 8px;
+            height: 18px;
+            border-radius: 2px;
+            background: linear-gradient(135deg, #00f0ff, #4facfe);
+            cursor: pointer;
+            box-shadow: 0 0 8px #00f0ff;
+            transition: transform 0.1s;
+        }
+        .custom-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        .custom-slider:disabled::-webkit-slider-thumb {
+            background: #64748b;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .led-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+        
+        /* 큐 리스트 스크롤러 단장 */
+        .queue-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .queue-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .queue-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+        }
+        .queue-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 240, 255, 0.3);
+        }
+
+        /* V5 UX 개편 추가 스타일 */
+        /* 1. 큼직하고 조작하기 편한 대기열 블록 */
+        .queue-item {
+            background: rgba(14, 20, 32, 0.55) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 12px !important;
+            padding: 16px 20px !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            margin-bottom: 8px;
+        }
+        .queue-item:hover {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border-color: rgba(0, 240, 255, 0.25) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 240, 255, 0.08);
+        }
+        .queue-item.active {
+            background: rgba(0, 240, 255, 0.06) !important;
+            border-color: #00f0ff !important;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2) !important;
+        }
+
+        /* 2. 눈에 번쩍 띄는 추천 장르 네온 폰트 */
+        #detected-genre {
+            font-size: 1.18rem !important;
+            font-weight: 800 !important;
+            color: #00f0ff !important;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.65), 0 0 2px rgba(0, 240, 255, 0.9) !important;
+            letter-spacing: -0.3px;
+        }
+
+        /* 3. 큼직한 마스터링 스타일 수정 드롭다운 */
+        #genre-select {
+            padding: 8px 16px !important;
+            font-size: 0.88rem !important;
+            font-weight: 700 !important;
+            height: auto !important;
+            min-width: 200px !important;
+            border: 1px solid rgba(0, 240, 255, 0.4) !important;
+            background-color: rgba(10, 12, 16, 0.9) !important;
+            border-radius: 8px !important;
+            transition: all 0.2s ease;
+        }
+        #genre-select:hover:not(:disabled) {
+            border-color: #00f0ff !important;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3) !important;
+        }
+
+        /* 4. 마스터링 진단 결과 텍스트 강조 리포트 박스 */
+        #analysis-reason {
+            font-size: 0.85rem !important;
+            color: #f1f5f9 !important;
+            line-height: 1.55 !important;
+            background: rgba(0, 240, 255, 0.04) !important;
+            padding: 14px 16px !important;
+            border-radius: 10px !important;
+            border: 1px solid rgba(0, 240, 255, 0.2) !important;
+            border-left: 4px solid #00f0ff !important;
+            box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.02) !important;
+        }
+
+        /* 5. 마스터링 성공 네온 초록 펄스 글로우 */
+        .export-success-glow {
+            animation: successGlow 2.5s ease-out !important;
+        }
+        @keyframes successGlow {
+            0% {
+                border-color: #39ff14 !important;
+                box-shadow: 0 0 35px rgba(57, 255, 20, 0.45) !important;
+                background-color: rgba(57, 255, 20, 0.08) !important;
+            }
+            100% {
+                border-color: rgba(255, 255, 255, 0.05) !important;
+                box-shadow: none;
+                background-color: rgba(14, 20, 32, 0.55) !important;
+            }
+        }
+
+        /* 6. 모달 윈도우 스케일 애니메이션 */
+        .modal-active {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        .modal-active > div {
+            transform: scale(1) !important;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        
+        /* 7. 오디오 랙 포커스 네온 펄스 */
+        .glow-focus-effect {
+            animation: focusGlowPulse 1.8s ease-in-out !important;
+        }
+        @keyframes focusGlowPulse {
+            0%, 100% {
+                border-color: rgba(255, 255, 255, 0.05) !important;
+                box-shadow: none;
+            }
+            30%, 70% {
+                border-color: #00f0ff !important;
+                box-shadow: 0 0 35px rgba(0, 240, 255, 0.35) !important;
+            }
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md selection:bg-primary-fixed/30 min-h-screen">
+
+<!-- 구글 스티치 WebGL Aurora Shader 배경막 -->
+<!-- STITCH_SHADER_START:ANIMATION_4 class="fixed inset-0 w-full h-full z-0 opacity-30 pointer-events-none" -->
+<div class="fixed inset-0 w-full h-full z-0 opacity-30 pointer-events-none" style="display:block;">
+    <canvas id="shader-canvas-ANIMATION_4" style="display:block;width:100%;height:100%"></canvas>
+    <script>
+    (function() {
+      const canvas = document.getElementById('shader-canvas-ANIMATION_4');
+      function syncSize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width  = w;
+          canvas.height = h;
+        }
+      }
+      window.addEventListener('resize', syncSize);
+      syncSize();
+
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return;
+      const vs = `attribute vec2 a_position;
+    varying vec2 v_texCoord;
+    void main() {
+      v_texCoord = a_position * 0.5 + 0.5;
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }`;
+      const fs = `precision highp float;
+    uniform float u_time;
+    uniform vec2 u_resolution;
+    varying vec2 v_texCoord;
+
+    void main() {
+        vec2 uv = v_texCoord;
+        float t = u_time * 0.2;
+        
+        float n1 = sin(uv.x * 3.0 + t) * 0.5 + 0.5;
+        float n2 = sin(uv.y * 2.0 - t * 1.5) * 0.5 + 0.5;
+        float n3 = cos(uv.x * 2.0 + uv.y * 3.0 + t * 0.8) * 0.5 + 0.5;
+        
+        vec3 color = vec3(0.02, 0.02, 0.03); 
+        
+        vec3 cyan = vec3(0.0, 0.94, 1.0);
+        float glow1 = smoothstep(0.4, 0.9, n1 * n2);
+        color += cyan * glow1 * 0.18;
+        
+        vec3 purple = vec3(0.64, 0.0, 1.0);
+        float glow2 = smoothstep(0.3, 0.8, n2 * n3);
+        color += purple * glow2 * 0.14;
+        
+        float d = length(uv - vec2(0.2, 0.8));
+        color += cyan * (1.0 - smoothstep(0.0, 0.8, d)) * 0.05;
+
+        gl_FragColor = vec4(color, 1.0);
+    }`;
+      function cs(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      }
+      const prog = gl.createProgram();
+      gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+      gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+      const pos = gl.getAttribLocation(prog, 'a_position');
+      gl.enableVertexAttribArray(pos);
+      gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+      const uTime = gl.getUniformLocation(prog, 'u_time');
+      const uRes = gl.getUniformLocation(prog, 'u_resolution');
+
+      function render(t) {
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        if (uTime) gl.uniform1f(uTime, t * 0.001);
+        if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        requestAnimationFrame(render);
+      }
+      render(0);
+    })();
+    </script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_4 -->
+
+<!-- 상단 네비게이션 바 -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-edge h-16 bg-surface/85 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,219,233,0.08)]">
+    <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-compact-disc text-primary-fixed-dim text-xl animate-spin" style="animation-duration: 8s;"></i>
+        <div class="font-headline-md text-headline-md font-bold text-primary-fixed tracking-tight uppercase select-none">
+            SYNTH MASTER AI
+        </div>
+    </div>
+    <div class="hidden md:flex items-center space-x-8">
+        <a class="text-primary-fixed-dim border-b-2 border-primary-fixed-dim pb-1 font-body-md cursor-pointer transition-colors duration-300" href="#">Studio 랙</a>
+        <a id="nav-library-link" class="text-on-surface-variant font-body-md hover:text-primary transition-colors duration-300 cursor-pointer" href="#">Library 서랍</a>
+        <a id="nav-guide-link" class="text-on-surface-variant font-body-md hover:text-primary transition-colors duration-300 cursor-pointer" href="#">유통 가이드</a>
+    </div>
+    <div class="flex items-center space-x-4">
+        <!-- PWA 설치 활성화 버튼 (기본 hidden, 지원 브라우저 감지 시 자동 노출) -->
+        <button id="btn-pwa-install" class="hidden px-3.5 py-1.5 bg-gradient-to-r from-primary-container to-inverse-primary text-on-primary font-bold text-xs rounded-full shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:brightness-110 active:scale-95 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-cloud-arrow-down"></i> 바탕화면 앱 설치
+        </button>
+        <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:scale-95" onclick="alert('SunoMaster V5 - 으뜸 스튜디오 에디션')">info</button>
+    </div>
+</nav>
+
+<!-- 좌측 네비게이션 도킹 독 -->
+<aside class="fixed left-0 top-16 bottom-0 z-40 flex flex-col py-gutter bg-surface-container-lowest/90 backdrop-blur-2xl border-r border-white/5 shadow-2xl w-20 hover:w-56 transition-all duration-300 group overflow-hidden">
+    <div class="flex flex-col flex-1 space-y-4 px-4">
+        <div class="flex items-center space-x-4 p-2 rounded-lg bg-primary-fixed/10 border-r-2 border-primary-fixed text-primary-fixed-dim">
+            <span class="material-symbols-outlined">grid_view</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity font-body-sm whitespace-nowrap">Dashboard</span>
+        </div>
+        <div id="dock-rack-link" class="flex items-center space-x-4 p-2 rounded-lg text-outline hover:text-on-surface-variant hover:bg-surface-container-high transition-all cursor-pointer">
+            <span class="material-symbols-outlined">graphic_eq</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity font-body-sm whitespace-nowrap">Audio Rack</span>
+        </div>
+    </div>
+    <div class="mt-auto px-4 space-y-4">
+        <button id="btn-dock-upload" class="w-full flex items-center justify-center p-2 bg-secondary-container text-on-secondary-container rounded-xl shadow-lg hover:brightness-110 transition-all">
+            <span class="material-symbols-outlined">add</span>
+            <span class="hidden group-hover:block ml-2 whitespace-nowrap font-body-sm">음원 추가</span>
+        </button>
+        <div class="flex items-center space-x-4 p-2 text-outline hover:text-on-surface-variant cursor-pointer" onclick="window.open('https://www.bandlab.com')">
+            <span class="material-symbols-outlined">help_outline</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity font-body-sm whitespace-nowrap">BandLab</span>
+        </div>
+    </div>
+</aside>
+
+<!-- 메인 스튜디오 작업 공간 -->
+<main class="ml-20 pt-24 pb-12 px-gutter min-h-screen relative z-10">
+    <div class="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+        
+        <!-- 왼쪽 패널: 음원 업로드 & 대기열 & 스마트 분석 -->
+        <section class="lg:col-span-5 space-y-gutter">
+            
+            <!-- 드롭존 (Dropzone) -->
+            <div id="drop-zone" class="glass-panel p-8 rounded-xl border-dashed border-2 border-outline/30 flex flex-col items-center justify-center text-center group cursor-pointer hover:border-primary-fixed/50 transition-all">
+                <input type="file" id="audio-file-input" accept="audio/*, .mp3, .wav, .m4a, .flac, .ogg" multiple style="display: none;">
+                <span class="material-symbols-outlined text-4xl text-outline group-hover:text-primary-fixed transition-colors mb-3">cloud_upload</span>
+                <h3 class="font-headline-md text-on-surface text-base mb-1">여기에 수노 AI 음원 드롭</h3>
+                <p class="text-on-surface-variant text-xs max-w-xs mb-1">MP3, WAV, M4A, FLAC 지원 (복수 선택 가능)</p>
+                <span class="text-[10px] text-outline">디토뮤직 음원 유통 스펙(16-bit 44.1kHz WAV)으로 일괄 변환</span>
+            </div>
+            
+            <!-- 플레이리스트 대기열 (Playlist Queue) -->
+            <div id="track-queue-card" class="glass-panel p-5 rounded-xl space-y-4 hidden">
+                <div class="flex justify-between items-center mb-1 flex-wrap gap-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="material-symbols-outlined text-primary-fixed text-base">queue_music</span>
+                        <h4 id="queue-title-text" class="font-headline-md text-primary-fixed text-sm">마스터링 대기열 (Queue)</h4>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="batch-genre-select" class="bg-surface-container-low text-[10px] border border-white/10 rounded-full px-2.5 py-1 text-secondary-fixed font-bold outline-none cursor-pointer" disabled>
+                            <option value="" disabled selected>일괄 스타일 지정</option>
+                            <option value="pop">Universal / Pop</option>
+                            <option value="hiphop">Fire / Hip-Hop</option>
+                            <option value="rock">Punch / Rock</option>
+                            <option value="ballad">Clarity / Ballad</option>
+                            <option value="lofi">Tape / Lo-Fi</option>
+                            <option value="jazzrnb">Clarity / Jazz R&B</option>
+                        </select>
+                        <button id="btn-batch-export" class="px-3 py-1 bg-gradient-to-r from-primary-fixed-dim to-inverse-primary text-on-primary font-bold text-xs rounded-full shadow hover:brightness-115 transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none" disabled>
+                            <i class="fa-solid fa-download"></i> 일괄 다운로드
+                        </button>
+                    </div>
+                </div>
+                <!-- 큐 스크롤 영역 (다수의 음원도 한눈에 시원하게 조망 가능하도록 높이 대폭 확장) -->
+                <div id="queue-list" class="queue-list queue-scroll space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                    <!-- JS 모듈을 통해 음원 리스트 행들이 동적으로 인젝션됨 -->
+                </div>
+
+                <!-- 앨범 단위 통합 대표 장르 추천 카드 (2곡 이상 로드 시 자동 팝업) -->
+                <div id="album-recommend-card" class="bg-primary-fixed/5 p-4 rounded-xl border border-primary-fixed/20 space-y-2.5 mt-3 hidden">
+                    <span class="text-[9px] font-data-mono text-primary-fixed uppercase flex items-center gap-1.5 font-bold">
+                        <i class="fa-solid fa-compact-disc animate-spin" style="animation-duration: 8s;"></i> ALBUM TOTAL GENRE RECOMMEND (앨범 통합 대표 장르 추천)
+                    </span>
+                    <p class="text-[10px] text-outline leading-relaxed">대기열에 로드된 총 <span id="album-track-count" class="text-white font-bold">0</span>곡의 분석 프로필을 실시간 크로스 분석한 결과, 이 앨범을 디토뮤직에 등록 시 가장 권장되는 대표 장르입니다.</p>
+                    <div class="grid grid-cols-2 gap-3 text-[11px]">
+                        <div class="bg-surface-container-lowest/80 p-2 rounded border border-white/5">
+                            <span class="text-outline text-[8px] block mb-0.5">Album Primary (앨범 대분류)</span>
+                            <span id="album-primary-genre" class="font-bold text-on-surface">Alternative</span>
+                        </div>
+                        <div class="bg-surface-container-lowest/80 p-2 rounded border border-white/5">
+                            <span class="text-outline text-[8px] block mb-0.5">Album Secondary (앨범 소분류)</span>
+                            <span id="album-secondary-genre" class="font-bold text-primary-fixed">Indie Pop</span>
+                        </div>
+                    </div>
+
+                    <!-- AI 앨범 아트워크 프롬프트 제안 박스 -->
+                    <div class="bg-surface-container-high/60 p-3 rounded-lg border border-white/5 space-y-2 mt-2">
+                        <span class="text-[9px] font-data-mono text-secondary-fixed flex items-center gap-1.5 font-bold">
+                            <i class="fa-solid fa-wand-magic-sparkles text-secondary-fixed"></i> AI ARTWORK PROMPT (앨범 커버 프롬프트 추천)
+                        </span>
+                        <div class="bg-surface-container-lowest/80 p-2.5 rounded border border-white/5 text-[10px] space-y-1.5">
+                            <span class="text-outline text-[8px] block">추천 커버 아트워크 테마 (Theme)</span>
+                            <p id="album-art-theme" class="text-on-surface font-semibold text-[11px]">도시의 밤, 네온 불빛과 아날로그 빈티지 감성의 쓸쓸함</p>
+                            
+                            <!-- 추천 타이포그래피 가이드 박스 -->
+                            <div class="bg-surface-container-high/30 p-2.5 rounded border border-white/5 text-[10px] space-y-1 mt-1.5">
+                                <span class="text-outline text-[8px] block font-bold"><i class="fa-solid fa-font text-outline"></i> RECOMMENDED TYPOGRAPHY (타이포그래피 및 배치 추천)</span>
+                                <div class="grid grid-cols-2 gap-3 text-[9px] pt-1">
+                                    <div class="bg-surface-container-lowest/50 p-2 rounded border border-white/5">
+                                        <span class="text-outline block text-[7px] mb-0.5">권장 폰트 스타일 (Google Fonts)</span>
+                                        <span id="album-font-style" class="font-bold text-on-surface">Playfair Display / Serif</span>
+                                    </div>
+                                    <div class="bg-surface-container-lowest/50 p-2 rounded border border-white/5">
+                                        <span class="text-outline block text-[7px] mb-0.5">글자 배치 레이아웃 (Layout)</span>
+                                        <span id="album-font-layout" class="text-secondary-fixed font-medium">하단 정중앙에 얇고 작게 여백 활용</span>
+                                    </div>
+                                </div>
+                                <!-- 추천 앨범 자켓용 대표 단어 제안 -->
+                                <div class="mt-2 bg-surface-container-lowest/70 p-2 rounded border border-white/5 flex justify-between items-center text-[9px] w-full">
+                                    <span class="text-outline text-[7.5px]"><i class="fa-solid fa-quote-left text-[6.5px]"></i> 자켓용 추천 시그니처 문구 (Signature Text)</span>
+                                    <span id="album-font-word" class="font-bold text-primary-fixed tracking-wider font-data-mono uppercase">"MISTY MORNING"</span>
+                                </div>
+                                <!-- [V5 최종 정점] 타이포그래피 디자인 프롬프트 텍스트 상자 및 복사 버튼 -->
+                                <div class="space-y-1.5 mt-2">
+                                    <span class="text-outline text-[7px] block">타이포그래피 디자인 가이드라인 (포토샵/디자인용 복사 가능)</span>
+                                    <textarea id="album-typo-prompt" readonly class="w-full bg-surface-container-lowest/80 text-[8.5px] font-data-mono border border-white/5 rounded p-1.5 text-secondary-fixed outline-none resize-none h-12 leading-relaxed" style="color: #4facfe;"></textarea>
+                                    <button id="btn-copy-typo" class="w-full py-1 bg-surface-container-lowest/80 border border-white/5 hover:border-secondary-fixed hover:bg-secondary-fixed/10 text-secondary-fixed font-bold text-[8.5px] rounded flex items-center justify-center gap-1.5 transition active:scale-[0.98] cursor-pointer" title="타이포 가이드 복사">
+                                        <i class="fa-regular fa-copy"></i> 타이포 가이드 복사하기
+                                    </button>
+                                </div>
+                            </div>
+
+                            <span class="text-outline text-[8px] block mt-2.5">이미지 생성 AI 프롬프트 (나노바나나 등에서 사용)</span>
+                            <div class="space-y-1.5">
+                                <textarea id="album-art-prompt" readonly class="w-full bg-surface-container-low text-[9px] font-data-mono border border-white/10 rounded p-1.5 text-secondary-fixed outline-none resize-none h-12 leading-relaxed" style="color: #00f0ff;">A moody cinematic photography of a rainy city street at night, neon reflections, vintage analog film grain style, highly detailed, album cover art --ar 1:1</textarea>
+                                <button id="btn-copy-prompt" class="w-full py-1.5 bg-surface-container-low border border-white/10 hover:border-primary-fixed hover:bg-primary-fixed/10 text-primary-fixed font-bold text-[9px] rounded flex items-center justify-center gap-1.5 transition active:scale-[0.98] cursor-pointer" title="프롬프트 복사">
+                                    <i class="fa-regular fa-copy"></i> 프롬프트 복사하기
+                                </button>
+                            </div>
+
+                            <!-- 아날로그 예술 치트키 필터 칩셋 (원클릭 토글 결합) -->
+                            <div class="space-y-1.5 mt-2.5 pt-2 border-t border-white/5">
+                                <span class="text-[8px] font-data-mono text-outline block">🎨 나노바나나 탈-클리셰 아날로그 치트키 (클릭 시 프롬프트에 자동 결합)</span>
+                                <div id="art-cheat-chips" class="flex flex-wrap gap-1.5">
+                                    <button class="chip-action px-2 py-0.5 bg-surface-container-low border border-white/5 rounded text-[8px] text-outline hover:border-primary-fixed hover:text-white transition cursor-pointer select-none" data-value=", raw risograph print style, offset ink bleed">#리소그래프 판화</button>
+                                    <button class="chip-action px-2 py-0.5 bg-surface-container-low border border-white/5 rounded text-[8px] text-outline hover:border-primary-fixed hover:text-white transition cursor-pointer select-none" data-value=", paper crease texture, worn booklet look">#구겨진 종이</button>
+                                    <button class="chip-action px-2 py-0.5 bg-surface-container-low border border-white/5 rounded text-[8px] text-outline hover:border-primary-fixed hover:text-white transition cursor-pointer select-none" data-value=", analog photography scan, dust and scratches">#필름 스크래치</button>
+                                    <button class="chip-action px-2 py-0.5 bg-surface-container-low border border-white/5 rounded text-[8px] text-outline hover:border-primary-fixed hover:text-white transition cursor-pointer select-none" data-value=", oil painting on raw textured canvas, thick brush strokes">#캔버스 유화</button>
+                                    <button class="chip-action px-2 py-0.5 bg-surface-container-low border border-white/5 rounded text-[8px] text-outline hover:border-primary-fixed hover:text-white transition cursor-pointer select-none" data-value=", retro photocopy machine distortion, high contrast photocopy scan">#복사기 그런지</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI 스마트 오디오 분석 패널 -->
+            <div id="analysis-panel" class="glass-panel p-5 rounded-xl space-y-4 hidden">
+                <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-secondary-fixed text-base">analytics</span>
+                    <h4 class="font-headline-md text-on-surface text-sm">AI 스마트 오디오 분석</h4>
+                </div>
+                
+                <div class="bg-surface-container-lowest/80 p-3 rounded-lg border border-white/5 flex justify-between items-center text-xs">
+                    <span id="display-file-name" class="font-bold text-on-surface-variant truncate max-w-[80%]">파일명.mp3</span>
+                    <span id="display-duration" class="font-data-mono text-outline">0:00</span>
+                </div>
+                
+                <!-- 분석 로딩 바 -->
+                <div id="analyzer-loading" class="analyzer-loading py-4">
+                    <div class="spinner"></div>
+                    <span class="text-xs text-outline">음원의 주파수 및 볼륨 프로필 분석 중...</span>
+                </div>
+                
+                <!-- 분석 결과 대시보드 -->
+                <div id="analyzer-results" class="analyzer-results space-y-4 hidden">
+                    <div class="result-badge-container">
+                        <div class="result-badge">
+                            <span class="badge-title">감지된 추천 장르</span>
+                            <span id="detected-genre" class="badge-value">Pop / Clarity</span>
+                        </div>
+                        <div class="genre-selector-container">
+                            <span class="badge-title">마스터링 스타일 수정</span>
+                            <select id="genre-select" class="bg-surface-container-low text-xs border border-white/10 rounded px-2 py-1 outline-none text-primary-fixed" disabled>
+                                <option value="auto" selected>AI 자동 분석 추천 (AI Auto)</option>
+                                <option value="custom">사용자 커스텀 (수정됨)</option>
+                                <option value="bypass">선택 안 함 (원음 그대로)</option>
+                                <option value="pop">Pop / Universal (원음 보존)</option>
+                                <option value="hiphop">Fire / Hip-Hop (저음 극대화)</option>
+                                <option value="rock">Punch / Rock (중음역 강화)</option>
+                                <option value="ballad">Clarity / Ballad (보컬 강화)</option>
+                                <option value="lofi">Tape / Lo-Fi (빈티지 감성)</option>
+                                <option value="jazzrnb">Clarity / Jazz R&B (보컬 및 공간 극대화)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <p id="analysis-reason" class="analysis-reason text-xs leading-relaxed"></p>
+                    
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-surface-container-low p-2.5 rounded text-center border border-white/5">
+                            <p class="text-[9px] font-data-mono text-outline mb-0.5">평균 음압 (RMS)</p>
+                            <p id="original-rms" class="font-data-mono text-sm text-primary-fixed font-bold">-18.5 dB</p>
+                        </div>
+                        <div class="bg-surface-container-low p-2.5 rounded text-center border border-white/5">
+                            <p class="text-[9px] font-data-mono text-outline mb-0.5">저음역 에너지</p>
+                            <p id="low-energy" class="font-body-md text-xs text-on-surface font-bold">보통</p>
+                        </div>
+                        <div class="bg-surface-container-low p-2.5 rounded text-center border border-white/5">
+                            <p class="text-[9px] font-data-mono text-outline mb-0.5">고음역 거침도</p>
+                            <p id="high-harshness" class="font-body-md text-xs text-primary-fixed font-bold">낮음</p>
+                        </div>
+                    </div>
+
+                    <!-- 디토뮤직 유통 장르 추천 가이드 카드 -->
+                    <div class="bg-surface-container-low/40 p-3 rounded-lg border border-white/5 space-y-2 mt-2">
+                        <span class="text-[9px] font-data-mono text-primary-fixed-dim uppercase flex items-center gap-1.5 font-bold">
+                            <i class="fa-solid fa-cloud-arrow-down text-primary-fixed-dim"></i> DITTO MUSIC GENRE RECOMMEND (디토 유통 장르 추천)
+                        </span>
+                        <div class="grid grid-cols-2 gap-3 text-[11px]">
+                            <div class="bg-surface-container-lowest/80 p-2 rounded border border-white/5">
+                                <span class="text-outline text-[8px] block mb-0.5">Primary (대분류)</span>
+                                <span id="ditto-primary-genre" class="font-bold text-on-surface">Alternative</span>
+                            </div>
+                            <div class="bg-surface-container-lowest/80 p-2 rounded border border-white/5">
+                                <span class="text-outline text-[8px] block mb-0.5">Secondary (소분류)</span>
+                                <span id="ditto-secondary-genre" class="font-bold text-primary-fixed">Indie Pop</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 마스터링 전/후 파형 비교 (Waveform Draw) -->
+                <div id="waveform-compare-container" class="space-y-1 hidden">
+                    <span class="text-[9px] font-data-mono text-outline uppercase flex items-center gap-1">
+                        <i class="fa-solid fa-chart-line text-primary-fixed-dim"></i> AUDIO WAVEFORM (마스터링 전/후 비교)
+                    </span>
+                    <div class="h-16 w-full bg-surface-container-lowest/80 rounded-lg relative overflow-hidden border border-white/5">
+                        <canvas id="waveform-canvas" class="w-full h-full block"></canvas>
+                    </div>
+                    <div class="flex justify-between text-[8px] text-outline font-data-mono px-1 pb-1">
+                        <span>BEFORE (오리지널 원곡)</span>
+                        <span class="text-primary-fixed">AFTER (마스터링 가상 예측)</span>
+                    </div>
+                </div>
+
+                <!-- 실시간 비주얼라이저 (WebGL 셰이더와 병행) -->
+                <div class="h-28 w-full bg-surface-container-lowest rounded-lg relative overflow-hidden">
+                    <canvas id="visualizer-canvas"></canvas>
+                    <span id="no-audio-fallback" class="canvas-fallback">AUDIO SIGNAL OFFLINE</span>
+                </div>
+            </div>
+            
+        </section>
+        
+        <!-- 오른쪽 패널: 마스터링 슬라이더 랙 (Effect Rack) -->
+        <section class="lg:col-span-7 space-y-gutter">
+            <div id="mastering-rack-card" class="glass-panel rounded-xl overflow-hidden shadow-2xl disabled">
+                
+                <!-- 랙 헤더 디자인 -->
+                <div class="bg-surface-container-high px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 rounded-full bg-primary-fixed led-pulse shadow-[0_0_8px_rgba(0,240,255,0.6)]"></div>
+                        <h2 class="font-data-mono text-xs tracking-widest text-on-surface-variant">MASTERING CONTROL PANEL v5.0</h2>
+                    </div>
+                    <div class="flex space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        <span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+                        <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                    </div>
+                </div>
+                
+                <!-- 랙 가로 슬라이더 세부 모듈 -->
+                <div class="p-5 space-y-6">
+                    
+                    <!-- 1. 3-BAND ANALOG EQ -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-outline">01. 3-BAND ANALOG EQ (주파수 균형 조절)</span>
+                            <span id="led-eq" class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">BASS (저음)</span>
+                                    <span id="val-eq-bass" class="text-primary-fixed font-bold">0.0 dB</span>
+                                </div>
+                                <input id="slider-eq-bass" class="custom-slider rack-slider" type="range" min="-6" max="6" value="0" step="0.1" disabled/>
+                                <div id="guide-eq-bass" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">낮추면 단단해지고 높이면 풍부해짐</p>
+                            </div>
+                            
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">MID (중음)</span>
+                                    <span id="val-eq-mid" class="text-secondary-fixed font-bold">0.0 dB</span>
+                                </div>
+                                <input id="slider-eq-mid" class="custom-slider rack-slider" type="range" min="-6" max="6" value="0" step="0.1" disabled/>
+                                <div id="guide-eq-mid" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">보컬 목소리 전달력 및 악기 선명도</p>
+                            </div>
+                            
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">TREBLE (고음)</span>
+                                    <span id="val-eq-treble" class="text-primary-fixed font-bold">0.0 dB</span>
+                                </div>
+                                <input id="slider-eq-treble" class="custom-slider rack-slider" type="range" min="-6" max="6" value="0" step="0.1" disabled/>
+                                <div id="guide-eq-treble" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">치찰음 제어 및 머리 위 공기감 조절</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. ANALOG SATURATION -->
+                    <div class="space-y-3 pt-3 border-t border-white/5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-outline">02. ANALOG SATURATION (따뜻한 배음 추가)</span>
+                            <span id="led-sat" class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">DRIVE (배음 강도)</span>
+                                    <span id="val-sat-drive" class="text-secondary-fixed font-bold">20 %</span>
+                                </div>
+                                <input id="slider-sat-drive" class="custom-slider rack-slider" type="range" min="0" max="100" value="20" step="1" disabled/>
+                                <div id="guide-sat-drive" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">진공관 오버드라이브식 아날로그 질감</p>
+                            </div>
+                            
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">DRY / WET MIX</span>
+                                    <span id="val-sat-mix" class="text-on-surface-variant font-bold">10 %</span>
+                                </div>
+                                <input id="slider-sat-mix" class="custom-slider rack-slider" type="range" min="0" max="100" value="10" step="1" disabled/>
+                                <div id="guide-sat-mix" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">원래 소리에 배음을 섞는 비율</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 3. DYNAMICS COMPRESSOR -->
+                    <div class="space-y-3 pt-3 border-t border-white/5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-outline">03. DYNAMICS COMPRESSOR (볼륨 균일화)</span>
+                            <span id="led-comp" class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">THRESHOLD</span>
+                                    <span id="val-comp-threshold" class="text-on-surface font-bold">-16 dB</span>
+                                </div>
+                                <input id="slider-comp-threshold" class="custom-slider rack-slider" type="range" min="-40" max="0" value="-16" step="1" disabled/>
+                                <div id="guide-comp-threshold" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">압축 기준 문턱값 조율</p>
+                            </div>
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">RATIO (압축비)</span>
+                                    <span id="val-comp-ratio" class="text-on-surface font-bold">1.5:1</span>
+                                </div>
+                                <input id="slider-comp-ratio" class="custom-slider rack-slider" type="range" min="1" max="4" value="1.5" step="0.1" disabled/>
+                                <div id="guide-comp-ratio" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">소리가 압축되는 단단한 비율</p>
+                            </div>
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">COMP AMOUNT</span>
+                                    <span id="val-comp-amount" class="text-on-surface font-bold">25 %</span>
+                                </div>
+                                <input id="slider-comp-amount" class="custom-slider rack-slider" type="range" min="0" max="100" value="25" step="1" disabled/>
+                                <div id="guide-comp-amount" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">실제 압축이 얹히는 강도</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 4. STEREO IMAGER -->
+                    <div class="space-y-3 pt-3 border-t border-white/5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-outline">04. STEREO IMAGER (공간감 범위 넓히기)</span>
+                            <span id="led-wide" class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">WIDTH (공간 넓이)</span>
+                                    <span id="val-wide-width" class="text-primary-fixed font-bold">120 %</span>
+                                </div>
+                                <input id="slider-wide-width" class="custom-slider rack-slider" type="range" min="50" max="200" value="120" step="1" disabled/>
+                                <div id="guide-wide-width" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">소리가 좌우로 펴지는 입체감</p>
+                            </div>
+                            <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                <div class="flex justify-between font-data-mono text-[10px]">
+                                    <span class="text-on-surface-variant">HAAS DELAY</span>
+                                    <span id="val-wide-delay" class="text-on-surface-variant font-bold">8 ms</span>
+                                </div>
+                                <input id="slider-wide-delay" class="custom-slider rack-slider" type="range" min="0" max="30" value="8" step="1" disabled/>
+                                <div id="guide-wide-delay" class="slider-neon-guide hidden"></div>
+                                <p class="text-[8px] text-outline">양쪽 귀 도달 시간차(ms) 입체 위상</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 5. BRICKWALL LIMITER -->
+                    <div class="space-y-3 pt-3 border-t border-white/5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data-mono text-[10px] text-error font-bold">05. BRICKWALL LIMITER & MAXIMIZER</span>
+                            <span class="w-2 h-2 rounded-full bg-error led-pulse shadow-[0_0_5px_#ffb4ab]"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-7 space-y-3">
+                                <div class="bg-surface-container-low/50 p-3 rounded-lg border border-white/5 space-y-1 slider-container-relative">
+                                    <div class="flex justify-between font-data-mono text-[10px]">
+                                        <span class="text-on-surface-variant">INPUT GAIN (소리 키우기)</span>
+                                        <span id="val-limiter-gain" class="text-primary-fixed font-bold">+2.5 dB</span>
+                                    </div>
+                                    <input id="slider-limiter-gain" class="custom-slider rack-slider" type="range" min="0" max="6" value="2.5" step="0.1" disabled/>
+                                    <div id="guide-limiter-gain" class="slider-neon-guide hidden"></div>
+                                    <p class="text-[8px] text-outline">디지털 깨짐 없이 볼륨을 증폭</p>
+                                </div>
+                                <div class="bg-surface-container-low/20 p-2.5 rounded-lg border border-white/5 flex justify-between items-center text-xs opacity-50">
+                                    <span class="text-[10px] text-outline font-data-mono">CEILING (피크 한계선 고정)</span>
+                                    <span class="font-bold text-outline">-1.0 dBFS</span>
+                                </div>
+                            </div>
+                            <div class="md:col-span-5 bg-surface-container-lowest/80 p-3 rounded-lg border border-white/5 flex flex-col justify-center">
+                                <p class="font-data-mono text-[9px] text-outline mb-1.5"><i class="fa-solid fa-arrow-down-long text-error"></i> GAIN REDUCTION (GR)</p>
+                                <div class="w-full h-3 bg-surface-container-high rounded relative overflow-hidden border border-white/5">
+                                    <div id="gr-meter-fill" class="absolute right-0 top-0 h-full bg-gradient-to-l from-error to-[#ffb700]" style="width: 0%"></div>
+                                </div>
+                                <div class="flex justify-between mt-1 font-data-mono text-[9px] text-outline">
+                                    <span>-12</span><span>-6</span><span>-3</span><span id="gr-meter-val" class="text-error font-bold">0.0 dB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- 플레이어 컨트롤 바 패널 -->
+                <div id="player-card" class="bg-surface-container-high/90 px-6 py-4 border-t border-white/10 flex items-center justify-between gap-4 disabled flex-wrap md:flex-nowrap">
+                    <div class="flex items-center space-x-3 flex-shrink-0">
+                        <button id="btn-play-pause" class="btn-play-pause" disabled>
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <!-- 음악을 들으며 실시간 비교가 극도로 편리한 바이패스 토글 -->
+                        <div class="flex items-center space-x-2 bg-surface-container-lowest px-3 py-1.5 rounded-full border border-white/5 shadow-inner">
+                            <span class="text-[9px] font-bold raw-label text-outline select-none">ORIGINAL</span>
+                            <label class="relative inline-block w-9 h-5 cursor-pointer">
+                                <input type="checkbox" id="bypass-toggle" class="opacity-0 w-0 h-0 peer" checked disabled>
+                                <span class="absolute inset-0 bg-outline-variant rounded-full transition duration-300 before:absolute before:h-3 before:w-3 before:left-1 before:bottom-1 before:bg-white before:rounded-full before:transition before:duration-300 peer-checked:bg-gradient-to-r peer-checked:from-primary peer-checked:to-primary-fixed-dim peer-checked:before:translate-x-4"></span>
+                            </label>
+                            <span class="text-[9px] font-bold mastered-label text-primary-fixed select-none">MASTERED</span>
+                        </div>
+                        
+                        <!-- [V5 우주끝판왕] 동일 음량 1:1 비교를 위한 Loudness Match 토글 -->
+                        <div class="flex items-center space-x-2 bg-surface-container-lowest px-3 py-1.5 rounded-full border border-white/5 shadow-inner">
+                            <span class="text-[8px] font-bold text-outline select-none">LOUDNESS MATCH</span>
+                            <label class="relative inline-block w-9 h-5 cursor-pointer">
+                                <input type="checkbox" id="loudness-match-toggle" class="opacity-0 w-0 h-0 peer" disabled>
+                                <span class="absolute inset-0 bg-outline-variant rounded-full transition duration-300 before:absolute before:h-3 before:w-3 before:left-1 before:bottom-1 before:bg-white before:rounded-full before:transition before:duration-300 peer-checked:bg-gradient-to-r peer-checked:from-secondary-fixed peer-checked:to-primary-fixed peer-checked:before:translate-x-4"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="progress-container flex-1">
+                        <span id="current-time" class="time-label text-xs">0:00</span>
+                        <input type="range" id="progress-slider" min="0" max="100" value="0" step="0.1" class="flex-1" disabled>
+                        <span id="total-time" class="time-label text-xs">0:00</span>
+                    </div>
+                </div>
+                
+                <!-- WAV Export 푸터 패널 -->
+                <div id="export-card" class="bg-surface-container px-6 py-5 border-t border-white/10 space-y-4 disabled">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <span class="material-symbols-outlined text-primary-fixed text-sm">file_download</span>
+                            <span class="font-body-md text-xs text-on-surface truncate max-w-[280px]">유통 규격 마스터링 WAV 저장</span>
+                        </div>
+                        <button id="btn-export-wav" class="px-4 py-1.5 bg-gradient-to-r from-primary-fixed-dim to-secondary-fixed text-on-primary font-bold text-xs rounded shadow hover:brightness-110 transition active:scale-95" disabled>
+                            WAV 저장하기
+                        </button>
+                    </div>
+                    
+                    <!-- 내보내기 진행 프로그레스 바 -->
+                    <div id="export-progress-container" class="hidden space-y-2">
+                        <div class="w-full h-1.5 bg-surface-container-lowest rounded-full overflow-hidden border border-white/5">
+                            <div id="export-progress-fill" class="h-full bg-gradient-to-r from-primary-fixed-dim to-secondary-fixed shadow-[0_0_10px_rgba(0,240,255,0.4)]" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-outline">
+                            <span id="export-status-text">이펙터 연산 처리 중...</span>
+                            <span id="export-percentage">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+    </div>
+</main>
+
+<!-- 모바일 최적화 바텀 탭 -->
+<footer class="md:hidden fixed bottom-0 left-0 w-full h-16 bg-surface/90 backdrop-blur-xl border-t border-white/10 z-50 flex justify-around items-center">
+    <button class="material-symbols-outlined text-primary-fixed" onclick="alert('대기열에 파일을 드롭하여 마스터링을 시작하세요!')">grid_view</button>
+    <button class="material-symbols-outlined text-outline" onclick="document.getElementById('drop-zone').click()">add_circle</button>
+</footer>
+
+<!-- ==========================================================================
+     PWA Premium Modals (유통 가이드 및 라이브러리 보관함)
+     ========================================================================== -->
+<!-- 1. 글로벌 유통 가이드 모달 -->
+<div id="modal-guide" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+    <div class="glass-panel w-full max-w-lg rounded-xl overflow-hidden shadow-2xl border border-white/10 m-4">
+        <div class="bg-surface-container-high px-6 py-4 border-b border-white/10 flex justify-between items-center">
+            <h3 class="font-headline-md text-primary-fixed text-sm font-bold flex items-center gap-2">
+                <i class="fa-solid fa-circle-info"></i> 글로벌 음원 유통 심사 가이드
+            </h3>
+            <button id="btn-close-guide" class="text-outline hover:text-white transition-colors">&times;</button>
+        </div>
+        <div class="p-6 space-y-4 text-xs leading-relaxed max-h-[70vh] overflow-y-auto">
+            <div class="bg-primary-fixed/5 p-3.5 rounded border border-primary-fixed/20 space-y-1">
+                <h4 class="font-bold text-primary-fixed">1. 무손실 WAV 포맷 제출 (100% 충족)</h4>
+                <p class="text-on-surface-variant">디토뮤직, 멜론, 스포티파이 등 모든 유통사는 MP3 제출을 거절합니다. 본 SunoMaster의 내보내기는 16-bit/44.1kHz 무손실 WAV로 포맷이 영구 고정되어 있어 100% 합격 규격입니다.</p>
+            </div>
+            
+            <div class="bg-secondary-fixed/5 p-3.5 rounded border border-secondary-fixed/20 space-y-1">
+                <h4 class="font-bold text-secondary-fixed">2. 트루 피크 -1.0dBTP 절대 규정 (100% 충족)</h4>
+                <p class="text-on-surface-variant">플랫폼 재생기에서 강제로 소리를 압착할 때 음원이 찢어지는 현상을 방지해야 합니다. 본 엔진은 피크 최대 마진을 -1.0dBFS로 자동 고정해 음질 페널티를 완벽 우회합니다.</p>
+            </div>
+            
+            <div class="bg-surface-container-low p-3.5 rounded border border-white/5 space-y-1">
+                <h4 class="font-bold text-on-surface">3. 앨범 커버 및 가사 매칭 팁 (유저 필수 확인)</h4>
+                <p class="text-outline">유통사에 음원을 제출할 때는 오디오 메타데이터의 곡명/아티스트명과 앨범 커버 이미지 내의 텍스트가 글자 하나 틀림없이 동일해야 심사가 거절되지 않습니다.</p>
+            </div>
+        </div>
+        <div class="bg-surface-container px-6 py-4 border-t border-white/10 flex justify-end">
+            <button id="btn-close-guide-ok" class="px-5 py-1.5 bg-primary text-on-primary font-bold rounded text-xs hover:brightness-110 active:scale-95 transition">확인했습니다</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. 라이브러리 작업 이력 서랍 모달 -->
+<div id="modal-library" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+    <div class="glass-panel w-full max-w-xl rounded-xl overflow-hidden shadow-2xl border border-white/10 m-4">
+        <div class="bg-surface-container-high px-6 py-4 border-b border-white/10 flex justify-between items-center">
+            <h3 class="font-headline-md text-secondary-fixed text-sm font-bold flex items-center gap-2">
+                <i class="fa-solid fa-box-archive"></i> Library 마스터링 히스토리 보관함
+            </h3>
+            <button id="btn-close-library" class="text-outline hover:text-white transition-colors">&times;</button>
+        </div>
+        <div class="p-6 space-y-4">
+            <p class="text-outline text-[11px] leading-relaxed">이번 세션 동안 마스터링을 완료하고 저장한 음원의 작업 이력 데이터베이스입니다. 작업 내역을 클릭하면 **당시 이펙터 슬라이더의 설정값(Recall)**을 실시간으로 다시 랙 조작반에 불러올 수 있습니다!</p>
+            
+            <!-- 이력 리스트 테이블 -->
+            <div class="border border-white/5 rounded-lg overflow-hidden bg-surface-container-lowest/50">
+                <table class="w-full text-[11px] text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-high border-b border-white/10 text-outline">
+                            <th class="p-3">음원명 (Track Name)</th>
+                            <th class="p-3 text-center">장르/성향</th>
+                            <th class="p-3 text-right">설정값 리콜</th>
+                        </tr>
+                    </thead>
+                    <tbody id="library-history-list" class="divide-y divide-white/5">
+                        <!-- JS를 통해 로컬 스토리지 작업 내역 리스트가 채워짐 -->
+                        <tr>
+                            <td colspan="3" class="p-6 text-center text-outline">저장 완료된 마스터링 히스토리가 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="bg-surface-container px-6 py-4 border-t border-white/10 flex justify-between items-center">
+            <button id="btn-clear-library" class="text-[10px] text-error hover:underline bg-none border-none cursor-pointer">이력 전체 삭제</button>
+            <button id="btn-close-library-ok" class="px-5 py-1.5 bg-secondary-container text-on-secondary-container font-bold rounded text-xs hover:brightness-110 active:scale-95 transition">닫기</button>
+        </div>
+    </div>
+</div>
+
+<footer class="app-footer">
+    <p>&copy; 2026 SunoMaster AI. Web Audio API-driven Studio Engine. No files uploaded to server.</p>
+</footer>
+
+<!-- JS 모듈 로드 -->
+<script src="presets.js"></script>
+<script src="audioAnalyzer.js"></script>
+<script src="wavEncoder.js"></script>
+<script src="audioEngine.js"></script>
+<script src="app.js"></script>
+<script>
+    // PWA 서비스 워커 등록 스크립트
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(reg => console.log('SunoMaster ServiceWorker 등록 성공:', reg.scope))
+                .catch(err => console.warn('SunoMaster ServiceWorker 등록 실패:', err));
+        });
+    }
+</script>
+</body>
+</html>
