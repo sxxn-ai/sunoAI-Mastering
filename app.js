@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tracks.push(newTrack);
             renderQueueUI();
             
-            analyzeTrack(newTrack);
+            await analyzeTrack(newTrack);
         }
     }
 
@@ -253,8 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             console.error(`${track.name} 분석 실패:`, error);
-            track.status = 'waiting'; 
-            alert(`음원(${track.name}) 분석 중 에러가 발생했습니다. 지원되는 오디오 포맷인지 확인해 주세요.`);
+            track.status = 'error'; 
             analyzerLoading.classList.add('hidden');
         } finally {
             renderQueueUI();
@@ -297,6 +296,22 @@ document.addEventListener('DOMContentLoaded', () => {
         progressSlider.value = 0;
         currentTimeLabel.textContent = "0:00";
         
+        if (!targetTrack.analysis) {
+            detectedGenre.textContent = "분석 실패 (대기 중)";
+            analysisReason.textContent = "음원 분석 데이터를 불러오지 못했습니다. 포맷을 확인하거나 삭제 후 재시도해주세요.";
+            originalRms.textContent = "- dB";
+            lowEnergy.textContent = "-";
+            highHarshness.textContent = "-";
+            
+            playerCard.classList.add('disabled');
+            masteringRackCard.classList.add('disabled');
+            exportCard.classList.add('disabled');
+            btnPlayPause.disabled = true;
+            progressSlider.disabled = true;
+            bypassToggle.disabled = true;
+            return;
+        }
+
         detectedGenre.textContent = targetTrack.analysis.compositeGenreName;
         
         // 디토뮤직 추천 장르 업데이트 연동 (분석 텍스트 키워드 매칭)
@@ -405,9 +420,10 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (track.status === 'ready') statusText = "준비 완료";
             else if (track.status === 'exporting') statusText = "WAV 추출 중";
             else if (track.status === 'done') statusText = "마스터링 완료";
+            else if (track.status === 'error') statusText = "분석 실패";
             
             // V5 대기열 장르 풀네임 노출 패치: 괄호 삭제 없이 전체 명칭 수록
-            const genreName = track.analysis ? track.analysis.compositeGenreName : "분석 대기";
+            const genreName = track.analysis ? track.analysis.compositeGenreName : "분석 대기 (또는 실패)";
             
             item.innerHTML = `
                 <div class="queue-item-meta">
